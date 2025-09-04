@@ -1,0 +1,119 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <radialGradient id="bgGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0a0a2e;stop-opacity:1" />
+    </radialGradient>
+    
+    <linearGradient id="brainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f093fb;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4fc3f7;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#68d391;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#4fc3f7;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#667eea;stop-opacity:0.8" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#bgGradient)" stroke="#667eea" stroke-width="4"/>
+  
+  <!-- Brain outline (simplified) -->
+  <path d="M180 160 Q160 140 160 180 Q140 200 160 220 Q140 240 160 260 Q140 280 160 300 Q160 320 180 320 Q200 340 240 340 Q280 340 320 320 Q340 320 340 300 Q360 280 340 260 Q360 240 340 220 Q360 200 340 180 Q340 140 320 160 Q300 140 280 140 Q260 130 240 140 Q220 130 200 140 Q180 140 180 160 Z" 
+        fill="none" 
+        stroke="url(#brainGradient)" 
+        stroke-width="6" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+  
+  <!-- Brain details -->
+  <path d="M200 180 Q220 160 240 180 Q260 160 280 180" 
+        fill="none" 
+        stroke="url(#brainGradient)" 
+        stroke-width="4" 
+        stroke-linecap="round"/>
+  
+  <path d="M190 220 Q210 200 230 220 Q250 200 270 220 Q290 200 310 220" 
+        fill="none" 
+        stroke="url(#brainGradient)" 
+        stroke-width="4" 
+        stroke-linecap="round"/>
+  
+  <path d="M200 260 Q220 240 240 260 Q260 240 280 260" 
+        fill="none" 
+        stroke="url(#brainGradient)" 
+        stroke-width="4" 
+        stroke-linecap="round"/>
+  
+  <!-- Neural activity dots -->
+  <circle cx="210" cy="190" r="4" fill="#f093fb" opacity="0.8">
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="256" cy="200" r="5" fill="#667eea" opacity="0.9">
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="290" cy="210" r="4" fill="#4fc3f7" opacity="0.7">
+    <animate attributeName="opacity" values="0.5;1;0.5" dur="2.2s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="220" cy="250" r="3" fill="#68d391" opacity="0.8">
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="1.8s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="270" cy="240" r="4" fill="#f093fb" opacity="0.6">
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Sound waves -->
+  <g transform="translate(256,380)">
+    <path d="M-60 0 Q-40 -15 -20 0 Q0 15 20 0 Q40 -15 60 0" 
+          fill="none" 
+          stroke="url(#waveGradient)" 
+          stroke-width="8" 
+          stroke-linecap="round" 
+          opacity="0.7">
+      <animate attributeName="opacity" values="0.3;0.8;0.3" dur="3s" repeatCount="indefinite"/>
+    </path>
+    
+    <path d="M-80 20 Q-60 5 -40 20 Q-20 35 0 20 Q20 5 40 20 Q60 35 80 20" 
+          fill="none" 
+          stroke="url(#waveGradient)" 
+          stroke-width="6" 
+          stroke-linecap="round" 
+          opacity="0.5">
+      <animate attributeName="opacity" values="0.2;0.6;0.2" dur="3.5s" repeatCount="indefinite"/>
+    </path>
+    
+    <path d="M-100 40 Q-80 25 -60 40 Q-40 55 -20 40 Q0 25 20 40 Q40 55 60 40 Q80 25 100 40" 
+          fill="none" 
+          stroke="url(#waveGradient)" 
+          stroke-width="4" 
+          stroke-linecap="round" 
+          opacity="0.4">
+      <animate attributeName="opacity" values="0.1;0.5;0.1" dur="4s" repeatCount="indefinite"/>
+    </path>
+  </g>
+  
+  <!-- Text -->
+  <text x="256" y="450" 
+        font-family="Arial, sans-serif" 
+        font-size="32" 
+        font-weight="bold" 
+        fill="url(#brainGradient)" 
+        text-anchor="middle">BEYOND</text>
+  
+  <text x="256" y="480" 
+        font-family="Arial, sans-serif" 
+        font-size="24" 
+        font-weight="normal" 
+        fill="#b794f6" 
+        text-anchor="middle" 
+        opacity="0.9">BRAIN.FM</text>
+</svg>
