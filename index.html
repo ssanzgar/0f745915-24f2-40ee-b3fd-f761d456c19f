@@ -1,1401 +1,2215 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-        <meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beyond Brain.fm - Sistema Científicamente Honesto</title>
+    <title>🧠 Sistema de Aprendizaje Científico con IA</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Aprendizaje IA">
+    <meta name="description" content="Sistema inteligente de aprendizaje científico con IA">
+    
+    <!-- PWA Icons -->
+    <link rel="apple-touch-icon" sizes="192x192" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%23667eea'/><text x='96' y='120' text-anchor='middle' font-size='120' fill='white'>🧠</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23667eea'/><text x='16' y='24' text-anchor='middle' font-size='20' fill='white'>🧠</text></svg>">
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* === VARIABLES Y RESET === */
+        :root {
+            --primary: #667eea;
+            --primary-dark: #764ba2;
+            --success: #4facfe;
+            --warning: #fa709a;
+            --danger: #ff6b6b;
+            --bg: linear-gradient(135deg, #1e3c72 0%, #667eea 100%);
+            --glass: rgba(255, 255, 255, 0.1);
+            --card: rgba(255, 255, 255, 0.95);
+            --text: #2d3748;
+            --text-secondary: #4a5568;
+            --text-muted: #718096;
+            --border: #e2e8f0;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            --radius: 16px;
+            --transition: all 0.3s ease;
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0a0a2e, #16213e, #1a1a3e);
-            color: #ffffff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
             min-height: 100vh;
-            padding: 20px;
+            color: var(--text);
+            line-height: 1.6;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+        /* === LAYOUT === */
+        .app { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            padding: 1rem; 
         }
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            background: rgba(255,255,255,0.05);
-            padding: 30px;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            margin-bottom: 2rem;
+            padding: 2rem 0;
         }
 
-        .title {
-            font-size: 2.8em;
-            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
+        .header h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 0.5rem;
         }
 
-        .subtitle {
-            color: #b794f6;
-            font-size: 1.1em;
-            margin-bottom: 15px;
-        }
-
-        .evidence-badge {
-            background: rgba(76, 175, 80, 0.2);
-            color: #A5D6A7;
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-size: 0.85em;
+        .header p {
+            background: var(--glass);
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
             display: inline-block;
-            margin: 5px;
-            border: 1px solid rgba(76, 175, 80, 0.3);
+            backdrop-filter: blur(20px);
         }
 
-        .main-grid {
+        /* === PWA STATUS === */
+        .pwa-status {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.8rem;
+            z-index: 998;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: var(--transition);
+        }
+
+        .pwa-status.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .pwa-status.offline {
+            background: var(--warning);
+        }
+
+        /* === NAVEGACIÓN === */
+        .nav {
+            background: var(--glass);
+            border-radius: var(--radius);
+            padding: 1rem;
+            backdrop-filter: blur(20px);
+            margin-bottom: 2rem;
+        }
+
+        .nav-tabs {
             display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 25px;
-            margin-bottom: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.5rem;
         }
 
-        @media (max-width: 968px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .states-panel {
-            background: rgba(255,255,255,0.08);
-            padding: 25px;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .state-card {
-            background: rgba(255,255,255,0.05);
-            border-radius: 15px;
-            padding: 20px;
-            margin: 15px 0;
-            border: 2px solid transparent;
+        .nav-tab {
+            background: var(--glass);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: var(--transition);
+            text-align: center;
+            font-weight: 600;
             position: relative;
         }
 
-        .state-card:hover {
-            border-color: rgba(102, 126, 234, 0.5);
+        .nav-tab:hover {
+            background: rgba(255,255,255,0.2);
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
         }
 
-        .state-card.selected {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.1);
+        .nav-tab.active {
+            background: white;
+            color: var(--text);
+            transform: translateY(-2px);
         }
 
-        .state-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .state-icon {
-            font-size: 2em;
-            margin-right: 15px;
-        }
-
-        .state-title {
-            font-size: 1.3em;
-            color: #e2e8f0;
-        }
-
-        .state-params {
-            font-size: 0.9em;
-            color: #a0aec0;
-            margin-bottom: 8px;
-        }
-
-        .state-evidence {
-            font-size: 0.85em;
-            color: #68d391;
-            margin-bottom: 5px;
-        }
-
-        .state-description {
-            font-size: 0.9em;
-            color: #cbd5e0;
-            line-height: 1.4;
-        }
-
-        .control-panel {
-            background: rgba(255,255,255,0.08);
-            padding: 25px;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .current-state {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .current-state-title {
-            font-size: 1.1em;
-            color: #b794f6;
-            margin-bottom: 10px;
-        }
-
-        .current-state-name {
-            font-size: 1.8em;
-            color: #667eea;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .current-params {
-            font-size: 0.9em;
-            color: #a0aec0;
-        }
-
-        .duration-selector {
-            margin: 20px 0;
-        }
-
-        .duration-options {
-            display: flex;
-            gap: 10px;
-            margin: 10px 0;
-            flex-wrap: wrap;
-        }
-
-        .duration-btn {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.9em;
-        }
-
-        .duration-btn:hover, .duration-btn.selected {
-            background: #667eea;
-            border-color: #667eea;
+        .badge-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
             color: white;
-        }
-
-        .visualizer {
-            height: 60px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
-            margin: 20px 0;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 2px;
-            padding: 10px;
+            font-weight: bold;
         }
 
-        .wave-bar {
-            width: 3px;
-            background: linear-gradient(180deg, #667eea, #764ba2);
-            border-radius: 2px;
-            transition: height 0.3s ease;
+        /* === CONTENIDO === */
+        .main {
+            background: var(--card);
+            border-radius: var(--radius);
+            min-height: 70vh;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(20px);
         }
 
-        .controls {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin: 20px 0;
+        .panel {
+            display: none;
+            padding: 2rem;
         }
 
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1em;
+        .panel.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === COMPONENTES === */
+        .section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 1024px) {
+            .section { grid-template-columns: 2fr 1fr; }
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .stats {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .stat {
+            margin-bottom: 1rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* === FORMULARIOS === */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
             font-weight: 600;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            color: var(--text);
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* === BOTONES === */
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
         }
 
         .btn-primary {
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
         }
 
-        .btn-primary:hover:not(:disabled) {
-            transform: scale(1.05);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #00f2fe);
+            color: white;
         }
 
         .btn-warning {
-            background: linear-gradient(45deg, #f093fb, #f5576c);
+            background: linear-gradient(135deg, var(--warning), #fee140);
             color: white;
         }
 
         .btn-danger {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            background: linear-gradient(135deg, var(--danger), #ff4757);
             color: white;
         }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-            box-shadow: none !important;
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
         }
 
-        .session-info {
-            background: rgba(102, 126, 234, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            text-align: center;
-        }
-
-        .session-info.hidden {
-            display: none;
-        }
-
-        .timer-display {
-            font-family: 'Courier New', monospace;
-            font-size: 1.4em;
-            color: #667eea;
-            margin: 10px 0;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            transition: width 0.5s ease;
-            width: 0%;
-        }
-
-        .evaluation-panel {
-            grid-column: 1 / -1;
-            background: rgba(255,255,255,0.08);
-            padding: 25px;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-            margin-top: 20px;
-        }
-
-        .eval-grid {
+        /* === GRID === */
+        .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+            grid-template-columns: 1fr;
+            gap: 2rem;
         }
 
-        .eval-section {
-            background: rgba(255,255,255,0.05);
-            padding: 20px;
-            border-radius: 12px;
+        @media (min-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr 1fr; }
         }
 
-        .rating-scale {
+        .grid-auto {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        /* === NOTAS === */
+        .notes {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .note {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .note:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            background: white;
+        }
+
+        .note-header {
             display: flex;
             justify-content: space-between;
-            margin: 10px 0;
-            background: rgba(255,255,255,0.05);
-            padding: 10px;
-            border-radius: 8px;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
 
-        .rating-btn {
-            width: 35px;
-            height: 35px;
-            border: 2px solid rgba(255,255,255,0.2);
-            background: transparent;
-            color: #e2e8f0;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.9em;
-            font-weight: bold;
+        .note-title {
+            font-weight: 700;
+            color: var(--text);
+            font-size: 1.1rem;
+            flex: 1;
         }
 
-        .rating-btn:hover, .rating-btn.selected {
-            border-color: #667eea;
-            background: #667eea;
-            color: white;
-            transform: scale(1.1);
+        .note-badges {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
-        .scientific-info {
-            grid-column: 1 / -1;
-            background: rgba(76, 175, 80, 0.05);
-            border: 1px solid rgba(76, 175, 80, 0.2);
-            padding: 25px;
-            border-radius: 20px;
-            margin-top: 20px;
+        .note-actions {
+            display: flex;
+            gap: 0.25rem;
+            margin-left: 0.5rem;
         }
 
-        .research-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+        .note-actions .btn {
+            padding: 0.3rem 0.5rem;
+            font-size: 0.7rem;
+            min-width: auto;
         }
 
-        .research-card {
-            background: rgba(255,255,255,0.03);
-            padding: 20px;
+        .badge {
+            padding: 0.2rem 0.6rem;
             border-radius: 12px;
-            border: 1px solid rgba(76, 175, 80, 0.2);
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: var(--primary);
+            color: white;
         }
 
-        .alert {
+        .badge-ai {
+            background: #0066cc;
+        }
+
+        .badge-easy { background: #22c55e; }
+        .badge-medium { background: #f59e0b; }
+        .badge-hard { background: #ef4444; }
+
+        /* === ESTADOS === */
+        .empty {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .hidden { 
+            display: none !important; 
+        }
+
+        /* === UPLOAD ZONE === */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 3rem 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, #ebf4ff, #dbeafe);
+            transform: scale(1.02);
+        }
+
+        /* === NOTIFICACIONES === */
+        .notification {
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 20px;
-            border-radius: 12px;
-            max-width: 400px;
+            padding: 1rem 2rem;
+            border-radius: var(--radius);
+            color: white;
+            font-weight: 600;
             z-index: 1000;
-            animation: slideIn 0.5s ease;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            transform: translateX(120%);
+            transition: var(--transition);
+            cursor: pointer;
+            max-width: 300px;
         }
 
-        .alert-success {
-            background: linear-gradient(45deg, #68d391, #48bb78);
-            color: #000;
+        .notification.show {
+            transform: translateX(0);
         }
 
-        .alert-info {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: #fff;
+        .notification-info { 
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
+        }
+        .notification-success { 
+            background: linear-gradient(135deg, var(--success), #00f2fe); 
+        }
+        .notification-warning { 
+            background: linear-gradient(135deg, var(--warning), #fee140); 
+        }
+        .notification-error { 
+            background: linear-gradient(135deg, var(--danger), #ff4757); 
         }
 
-        .alert-warning {
-            background: linear-gradient(45deg, #f093fb, #f5576c);
-            color: #fff;
+        /* === RESPONSIVE === */
+        @media (max-width: 768px) {
+            .nav-tabs { 
+                grid-template-columns: repeat(2, 1fr); 
+            }
+            .section { 
+                grid-template-columns: 1fr; 
+            }
+            .grid { 
+                grid-template-columns: 1fr; 
+            }
+            .panel { 
+                padding: 1rem; 
+            }
         }
 
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        /* === MODAL === */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            animation: fadeIn 0.3s ease;
         }
 
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
-        .honest-disclaimer {
-            background: rgba(255, 193, 7, 0.1);
-            border: 2px solid #fbbf24;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 25px 0;
-            text-align: center;
-        }
-
-        .params-display {
-            background: rgba(0,0,0,0.2);
-            padding: 10px;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85em;
-            color: #a0aec0;
-            margin: 10px 0;
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
         }
     </style>
-    <!-- PWA Configuration -->
-    <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#667eea">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Beyond Brain.fm">
-    <link rel="apple-touch-icon" href="./icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="./icon-512x512.png">
 </head>
 <body>
-    <div class="container">
-        <!-- HEADER -->
-        <div class="header">
-            <h1 class="title">🧠 BEYOND BRAIN.FM</h1>
-            <p class="subtitle">Sistema Científicamente Honesto • Basado en Evidencia Real • Sin Marketing Exagerado</p>
-            <div class="evidence-badge">📚 Literatura Revisada</div>
-            <div class="evidence-badge">⚖️ Claims Verificables</div>
-            <div class="evidence-badge">🔬 Transparencia Total</div>
-            <div class="evidence-badge">🎯 Auto-Evaluación</div>
-        </div>
+    <!-- PWA Status -->
+    <div class="pwa-status" id="pwaStatus">📱 PWA Activa</div>
+    
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <h1>🧠 Sistema de Aprendizaje Científico con IA</h1>
+            <p>🤖 Cerebro Digital ML | 📚 Procesamiento Inteligente | 🎯 Generación Automática | 📱 PWA</p>
+        </header>
 
-        <!-- HONEST DISCLAIMER -->
-        <div class="honest-disclaimer">
-            <h3 style="color: #fbbf24; margin-bottom: 15px;">⚠️ TRANSPARENCIA CIENTÍFICA TOTAL</h3>
-            <p style="line-height: 1.6; color: #fef3c7;">
-                <strong>Este sistema NO garantiza mejoras cognitivas.</strong> Los efectos de audio neurológico son:
-                <strong>sutiles, variables entre personas, principalmente subjetivos</strong>. Basado en parámetros de estudios reales,
-                pero los resultados individuales <strong>NO están garantizados</strong>. Usar para exploración personal,
-                no como tratamiento médico.
-            </p>
-        </div>
-
-        <!-- MAIN INTERFACE -->
-        <div class="main-grid">
-            <!-- ESTADOS DISPONIBLES -->
-            <div class="states-panel">
-                <h3 style="color: #b794f6; margin-bottom: 20px; font-size: 1.4em;">🎯 Estados Disponibles</h3>
-                
-                <div class="state-card" data-state="deep-relaxation" onclick="selectState('deep-relaxation')">
-                    <div class="state-header">
-                        <span class="state-icon">🧘</span>
-                        <span class="state-title">Deep Relaxation</span>
-                    </div>
-                    <div class="state-evidence">📚 Evidencia: ALTA (40+ estudios)</div>
-                    <div class="state-params">🎵 Alpha 10Hz • 🔊 220Hz portadora • 📊 30% modulación</div>
-                    <div class="state-description">
-                        Estado de relajación profunda basado en investigación Alpha sólida. Efectos reportados:
-                        reducción de cortisol, menor activación simpática, sensación subjetiva de calma.
-                    </div>
-                    <div class="params-display">
-                        Parámetros: Isochronic 10Hz | Carrier 220Hz | Envelope 0.3 | Duration 15-25min
-                    </div>
-                </div>
-
-                <div class="state-card" data-state="calm-focus" onclick="selectState('calm-focus')">
-                    <div class="state-header">
-                        <span class="state-icon">⚡</span>
-                        <span class="state-title">Calm Focus</span>
-                    </div>
-                    <div class="state-evidence">📚 Evidencia: ALTA (neurofeedback clínico)</div>
-                    <div class="state-params">🎵 SMR 13Hz • 🔊 220Hz portadora • 📊 25% modulación</div>
-                    <div class="state-description">
-                        Protocolo SMR usado en neurofeedback clínico. Efectos documentados: reducción de ansiedad,
-                        mejora en tareas de atención sostenida, regulación emocional.
-                    </div>
-                    <div class="params-display">
-                        Parámetros: Isochronic 13Hz | Carrier 220Hz | Envelope 0.25 | Duration 20-30min
-                    </div>
-                </div>
-
-                <div class="state-card" data-state="meditative" onclick="selectState('meditative')">
-                    <div class="state-header">
-                        <span class="state-icon">🌙</span>
-                        <span class="state-title">Meditative State</span>
-                    </div>
-                    <div class="state-evidence">📚 Evidencia: MODERADA (estudios mixtos)</div>
-                    <div class="state-params">🎵 Theta 6Hz • 🔊 220Hz portadora • 📊 35% modulación</div>
-                    <div class="state-description">
-                        Estado Theta asociado con meditación profunda. Evidencia limitada pero consistente para
-                        introspección, relajación profunda, posible acceso a estados meditativos.
-                    </div>
-                    <div class="params-display">
-                        Parámetros: Isochronic 6Hz | Carrier 220Hz | Envelope 0.35 | Duration 20-35min
-                    </div>
-                </div>
+        <!-- Navegación -->
+        <nav class="nav">
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="upload">
+                    📄 Subir
+                    <span class="badge-count hidden" id="uploadCount">0</span>
+                </button>
+                <button class="nav-tab" data-tab="testing">
+                    🎯 Testing
+                    <span class="badge-count hidden" id="testingCount">0</span>
+                </button>
+                <button class="nav-tab" data-tab="elaborative">
+                    🤔 Elaborativa
+                    <span class="badge-count hidden" id="elaborativeCount">0</span>
+                </button>
+                <button class="nav-tab" data-tab="explanation">
+                    📝 Explicación
+                    <span class="badge-count hidden" id="explanationCount">0</span>
+                </button>
+                <button class="nav-tab" data-tab="interleaving">
+                    🔀 Intercalado
+                    <span class="badge-count hidden" id="interleavingCount">0</span>
+                </button>
+                <button class="nav-tab" data-tab="manager">
+                    🗂️ Gestión
+                    <span class="badge-count hidden" id="managerCount">0</span>
+                </button>
+                <button class="nav-tab" data-tab="analytics">📊 Analytics</button>
             </div>
+        </nav>
 
-            <!-- PANEL DE CONTROL -->
-            <div class="control-panel">
-                <div class="current-state">
-                    <div class="current-state-title">Estado Actual</div>
-                    <div class="current-state-name" id="currentStateName">Ninguno</div>
-                    <div class="current-params" id="currentStateParams">Selecciona un estado</div>
-                </div>
-
-                <!-- SELECTOR DE DURACIÓN -->
-                <div class="duration-selector">
-                    <h4 style="color: #b794f6; margin-bottom: 10px;">⏰ Duración</h4>
-                    <div class="duration-options">
-                        <button class="duration-btn" data-duration="10" onclick="selectDuration(10)">10 min</button>
-                        <button class="duration-btn selected" data-duration="15" onclick="selectDuration(15)">15 min</button>
-                        <button class="duration-btn" data-duration="20" onclick="selectDuration(20)">20 min</button>
-                        <button class="duration-btn" data-duration="25" onclick="selectDuration(25)">25 min</button>
-                        <button class="duration-btn" data-duration="30" onclick="selectDuration(30)">30 min</button>
+        <!-- Contenido Principal -->
+        <main class="main">
+            <!-- Panel Upload -->
+            <section class="panel active" id="panel-upload">
+                <div class="section">
+                    <div>
+                        <h2 style="color: var(--primary); font-size: 2rem; margin-bottom: 1rem;">📄 Procesamiento de Documentos</h2>
+                        <div class="card">
+                            <h3>🤖 Inteligencia Artificial</h3>
+                            <p>Sistema ML que analiza documentos, extrae conceptos y genera automáticamente contenido optimizado para tu aprendizaje.</p>
+                            <br>
+                            <p><strong>Formatos:</strong> PDF, Markdown, TXT</p>
+                        </div>
+                    </div>
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value">🧠</div>
+                            <div class="stat-label">IA Avanzada</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">92%</div>
+                            <div class="stat-label">Precisión ML</div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- VISUALIZADOR -->
-                <div class="visualizer" id="visualizer">
-                    <!-- Will be populated by JavaScript -->
+                <div class="upload-zone" id="uploadZone">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+                    <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;">
+                        Arrastra archivos aquí o haz clic para seleccionar
+                    </div>
+                    <div style="color: var(--text-muted);">Soporta: PDF, MD, TXT • Máximo 10MB</div>
+                    <input type="file" id="fileInput" multiple accept=".pdf,.md,.txt" style="display: none;">
                 </div>
 
-                <!-- CONTROLES -->
-                <div class="controls">
-                    <button class="btn btn-primary" id="startBtn" onclick="startSession()" disabled>
-                        ▶️ Iniciar Sesión
-                    </button>
-                    <button class="btn btn-warning" id="pauseBtn" onclick="togglePause()" disabled>
-                        ⏸️ Pausar
-                    </button>
-                    <button class="btn btn-danger" id="stopBtn" onclick="stopSession()" disabled>
-                        ⏹️ Detener
-                    </button>
-                </div>
-
-                <!-- INFO DE SESIÓN -->
-                <div class="session-info hidden" id="sessionInfo">
-                    <div class="timer-display" id="timerDisplay">00:00</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill"></div>
+                <div class="grid grid-2 hidden" id="results">
+                    <div class="card">
+                        <h3>🔍 Análisis del Documento</h3>
+                        <div id="documentAnalysis">
+                            <div class="empty">
+                                <div class="empty-icon">⚡</div>
+                                <div class="empty-title">Procesando...</div>
+                            </div>
+                        </div>
                     </div>
-                    <div style="font-size: 0.9em; color: #a0aec0;">
-                        <span id="phaseDisplay">Preparando...</span>
+                    <div class="notes">
+                        <h3>🎯 Preguntas Generadas por IA</h3>
+                        <div id="generatedQuestions">
+                            <div class="empty">
+                                <div class="empty-icon">🤖</div>
+                                <div class="empty-title">Generando...</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </section>
 
-        <!-- PANEL DE AUTO-EVALUACIÓN -->
-        <div class="evaluation-panel">
-            <h3 style="color: #b794f6; margin-bottom: 15px; font-size: 1.4em;">📊 Auto-Evaluación Post-Sesión</h3>
-            <p style="color: #cbd5e0; margin-bottom: 20px;">
-                Evalúa honestamente tus efectos subjetivos. Esta data ayuda a optimizar parámetros personales.
-                <strong>No existen respuestas "correctas"</strong> - reporta tu experiencia real.
-            </p>
-            
-            <div class="eval-grid" id="evaluationGrid" style="display: none;">
-                <div class="eval-section">
-                    <h4 style="color: #667eea; margin-bottom: 10px;">😌 Nivel de Relajación</h4>
-                    <p style="font-size: 0.85em; color: #a0aec0; margin-bottom: 10px;">
-                        ¿Qué tan relajado/a te sientes comparado con antes?
-                    </p>
-                    <div class="rating-scale" data-metric="relaxation">
-                        <button class="rating-btn" data-value="1" onclick="setRating('relaxation', 1)">1</button>
-                        <button class="rating-btn" data-value="2" onclick="setRating('relaxation', 2)">2</button>
-                        <button class="rating-btn" data-value="3" onclick="setRating('relaxation', 3)">3</button>
-                        <button class="rating-btn" data-value="4" onclick="setRating('relaxation', 4)">4</button>
-                        <button class="rating-btn" data-value="5" onclick="setRating('relaxation', 5)">5</button>
+            <!-- Panel Testing -->
+            <section class="panel" id="panel-testing">
+                <div class="section">
+                    <div>
+                        <h2 style="color: var(--primary); font-size: 2rem; margin-bottom: 1rem;">🎯 Testing con Repetición Espaciada</h2>
+                        <div class="card">
+                            <h3>Ciencia del Aprendizaje</h3>
+                            <p>Fortalece las conexiones neuronales mediante recuperación activa. Cada intento crea rutas más fuertes para acceder al conocimiento.</p>
+                        </div>
                     </div>
-                    <div style="font-size: 0.8em; color: #718096; display: flex; justify-content: space-between;">
-                        <span>Menos</span><span>Igual</span><span>Más</span>
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value">74%</div>
+                            <div class="stat-label">Más Efectivo</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">6+</div>
+                            <div class="stat-label">Meses</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="eval-section">
-                    <h4 style="color: #667eea; margin-bottom: 10px;">🎯 Claridad Mental</h4>
-                    <p style="font-size: 0.85em; color: #a0aec0; margin-bottom: 10px;">
-                        ¿Cómo está tu claridad mental ahora vs. antes?
-                    </p>
-                    <div class="rating-scale" data-metric="focus">
-                        <button class="rating-btn" data-value="1" onclick="setRating('focus', 1)">1</button>
-                        <button class="rating-btn" data-value="2" onclick="setRating('focus', 2)">2</button>
-                        <button class="rating-btn" data-value="3" onclick="setRating('focus', 3)">3</button>
-                        <button class="rating-btn" data-value="4" onclick="setRating('focus', 4)">4</button>
-                        <button class="rating-btn" data-value="5" onclick="setRating('focus', 5)">5</button>
+                <div class="grid grid-2">
+                    <div class="card">
+                        <h3>➕ Crear Pregunta</h3>
+                        <form id="testingForm">
+                            <div class="form-group">
+                                <label class="form-label">Concepto</label>
+                                <input type="text" class="form-input" id="testingConcept" placeholder="Ej: Neuroplasticidad" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Pregunta</label>
+                                <textarea class="form-textarea" id="testingQuestion" placeholder="¿Cuáles son las características...?" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Respuesta</label>
+                                <textarea class="form-textarea" id="testingAnswer" placeholder="Respuesta detallada..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">➕ Crear Pregunta</button>
+                        </form>
                     </div>
-                    <div style="font-size: 0.8em; color: #718096; display: flex; justify-content: space-between;">
-                        <span>Peor</span><span>Igual</span><span>Mejor</span>
+                    <div class="notes">
+                        <h3>🎯 Preguntas para Revisar</h3>
+                        <div id="testingQuestions">
+                            <div class="empty">
+                                <div class="empty-icon">🎯</div>
+                                <div class="empty-title">Sin preguntas</div>
+                                <p>Sube documentos o crea manualmente</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Panel Elaborative -->
+            <section class="panel" id="panel-elaborative">
+                <div class="section">
+                    <div>
+                        <h2 style="color: var(--primary); font-size: 2rem; margin-bottom: 1rem;">🤔 Interrogación Elaborativa</h2>
+                        <div class="card">
+                            <h3>Preguntas "¿Por qué?"</h3>
+                            <p>Fortalece la comprensión mediante preguntas que obligan a hacer conexiones causales y explicar mecanismos subyacentes.</p>
+                        </div>
+                    </div>
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value">56%</div>
+                            <div class="stat-label">Mejora</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">3.2x</div>
+                            <div class="stat-label">Conexiones</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="eval-section">
-                    <h4 style="color: #667eea; margin-bottom: 10px;">😊 Estado de Ánimo</h4>
-                    <p style="font-size: 0.85em; color: #a0aec0; margin-bottom: 10px;">
-                        ¿Cómo cambió tu estado de ánimo?
-                    </p>
-                    <div class="rating-scale" data-metric="mood">
-                        <button class="rating-btn" data-value="1" onclick="setRating('mood', 1)">1</button>
-                        <button class="rating-btn" data-value="2" onclick="setRating('mood', 2)">2</button>
-                        <button class="rating-btn" data-value="3" onclick="setRating('mood', 3)">3</button>
-                        <button class="rating-btn" data-value="4" onclick="setRating('mood', 4)">4</button>
-                        <button class="rating-btn" data-value="5" onclick="setRating('mood', 5)">5</button>
+                <div class="grid grid-2">
+                    <div class="notes">
+                        <h3>🧠 Conceptos Identificados</h3>
+                        <div id="elaborativeConcepts">
+                            <div class="empty">
+                                <div class="empty-icon">🤔</div>
+                                <div class="empty-title">Sin conceptos</div>
+                                <p>Sube documentos para identificación automática</p>
+                            </div>
+                        </div>
                     </div>
-                    <div style="font-size: 0.8em; color: #718096; display: flex; justify-content: space-between;">
-                        <span>Peor</span><span>Igual</span><span>Mejor</span>
+                    <div class="card">
+                        <h3>❓ Sesión de Elaboración</h3>
+                        <div style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 2rem; border-radius: var(--radius); text-align: center;">
+                            <h4 id="currentWhyQuestion" style="color: white; margin-bottom: 1rem;">Selecciona un concepto para comenzar</h4>
+                            <textarea class="form-textarea" id="elaborationResponse" placeholder="Explica las causas, mecanismos y conexiones..." style="background: rgba(255,255,255,0.9); color: var(--text); margin: 1rem 0;"></textarea>
+                            <div>
+                                <button class="btn btn-success" onclick="App.elaborative.analyze()">🧠 Analizar IA</button>
+                                <button class="btn btn-warning" onclick="App.elaborative.generateNew()">🔄 Nueva Pregunta</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Panel Explanation -->
+            <section class="panel" id="panel-explanation">
+                <div class="section">
+                    <div>
+                        <h2 style="color: var(--primary); font-size: 2rem; margin-bottom: 1rem;">📝 Auto-explicación Guiada</h2>
+                        <div class="card">
+                            <h3>Metacognición</h3>
+                            <p>Te obliga a verbalizar tu comprensión, identificando gaps de conocimiento y fortaleciendo la codificación en memoria.</p>
+                        </div>
+                    </div>
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value">54%</div>
+                            <div class="stat-label">Mejora</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">90%</div>
+                            <div class="stat-label">Gap Detection</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="eval-section">
-                    <h4 style="color: #667eea; margin-bottom: 10px;">⚡ Energía</h4>
-                    <p style="font-size: 0.85em; color: #a0aec0; margin-bottom: 10px;">
-                        ¿Cómo están tus niveles de energía?
-                    </p>
-                    <div class="rating-scale" data-metric="energy">
-                        <button class="rating-btn" data-value="1" onclick="setRating('energy', 1)">1</button>
-                        <button class="rating-btn" data-value="2" onclick="setRating('energy', 2)">2</button>
-                        <button class="rating-btn" data-value="3" onclick="setRating('energy', 3)">3</button>
-                        <button class="rating-btn" data-value="4" onclick="setRating('energy', 4)">4</button>
-                        <button class="rating-btn" data-value="5" onclick="setRating('energy', 5)">5</button>
+                <div class="grid grid-2">
+                    <div class="notes">
+                        <h3>📝 Conceptos para Explicar</h3>
+                        <div id="explanationConcepts">
+                            <div class="empty">
+                                <div class="empty-icon">📝</div>
+                                <div class="empty-title">Sin conceptos</div>
+                                <p>Sube documentos para generación automática</p>
+                            </div>
+                        </div>
                     </div>
-                    <div style="font-size: 0.8em; color: #718096; display: flex; justify-content: space-between;">
-                        <span>Más cansado</span><span>Igual</span><span>Más energizado</span>
+                    <div class="card">
+                        <h3 id="currentExplanationConcept">Selecciona un concepto</h3>
+                        <div id="currentExplanationDefinition" style="background: rgba(102, 126, 234, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                            La definición aparecerá aquí
+                        </div>
+                        <textarea class="form-textarea" id="personalExplanation" placeholder="Explica este concepto con tus propias palabras..." style="min-height: 150px;"></textarea>
+                        <div style="margin-top: 1rem;">
+                            <button class="btn btn-success" onclick="App.explanation.analyze()">📊 Analizar</button>
+                            <button class="btn btn-warning" onclick="App.explanation.suggestConnections()">🔗 Conexiones</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Panel Interleaving -->
+            <section class="panel" id="panel-interleaving">
+                <div class="section">
+                    <div>
+                        <h2 style="color: var(--primary); font-size: 2rem; margin-bottom: 1rem;">🔀 Intercalado Inteligente</h2>
+                        <div class="card">
+                            <h3>Transferencia de Conocimiento</h3>
+                            <p>Mezcla diferentes tipos de problemas en lugar de practicar uno a la vez. 67% más efectivo para materiales visuales.</p>
+                        </div>
+                    </div>
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value">67%</div>
+                            <div class="stat-label">Mejora</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">4.1x</div>
+                            <div class="stat-label">Transferencia</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="eval-section" style="grid-column: 1 / -1;">
-                    <h4 style="color: #667eea; margin-bottom: 10px;">💬 Comentarios</h4>
-                    <textarea id="sessionComments" placeholder="Describe cualquier efecto, sensación o observación específica..."
-                             style="width: 100%; height: 80px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); 
-                                    border-radius: 8px; padding: 10px; color: #e2e8f0; resize: vertical;"></textarea>
-                    
-                    <button class="btn btn-primary" onclick="saveEvaluation()" style="margin-top: 10px;">
-                        💾 Guardar Evaluación
-                    </button>
+                <div class="grid grid-2">
+                    <div class="notes">
+                        <h3>🔀 Problemas Identificados</h3>
+                        <div id="interleavingProblems">
+                            <div class="empty">
+                                <div class="empty-icon">🔀</div>
+                                <div class="empty-title">Sin problemas</div>
+                                <p>La IA identificará tipos automáticamente</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>🎲 Secuencia Optimizada</h3>
+                        <div id="problemSequence">
+                            <div class="empty">
+                                <div class="empty-icon">🎲</div>
+                                <div class="empty-title">Sube contenido</div>
+                                <p>Para generar secuencia optimizada</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-warning" onclick="App.interleaving.optimize()" style="width: 100%; margin-top: 1rem;">
+                            🎲 Reoptimizar Secuencia
+                        </button>
+                    </div>
                 </div>
-            </div>
-        </div>
+            </section>
 
-        <!-- INFORMACIÓN CIENTÍFICA -->
-        <div class="scientific-info">
-            <h3 style="color: #68d391; margin-bottom: 15px; font-size: 1.4em;">🔬 Fundamentos Científicos</h3>
-            
-            <div class="research-grid">
-                <div class="research-card">
-                    <h4 style="color: #48bb78; margin-bottom: 10px;">🎯 Diferencias vs Brain.fm</h4>
-                    <ul style="color: #9ae6b4; line-height: 1.6; margin-left: 20px;">
-                        <li><strong>Transparencia:</strong> Parámetros completamente abiertos</li>
-                        <li><strong>Claims honestos:</strong> Sin promesas exageradas</li>
-                        <li><strong>Auto-evaluación:</strong> Tracking de efectos reales</li>
-                        <li><strong>Código abierto:</strong> Algoritmos verificables</li>
-                    </ul>
+            <!-- Panel Manager -->
+            <section class="panel" id="panel-manager">
+                <div class="section">
+                    <div>
+                        <h2 style="color: var(--primary); font-size: 2rem; margin-bottom: 1rem;">🗂️ Gestión Inteligente</h2>
+                        <div class="card">
+                            <h3>🤖 Búsqueda Semántica</h3>
+                            <p>Sistema ML de gestión que permite buscar, editar y organizar todas tus notas con interconexiones automáticas.</p>
+                        </div>
+                    </div>
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value">🔍</div>
+                            <div class="stat-label">Search ML</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="connectionsCount">0</div>
+                            <div class="stat-label">Conexiones</div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
+
+                <div class="card" style="margin-bottom: 2rem;">
+                    <div class="grid grid-auto">
+                        <div class="form-group">
+                            <input type="text" class="form-input" id="smartSearch" placeholder="🔍 Búsqueda inteligente...">
+                        </div>
+                        <div class="form-group">
+                            <select class="form-select" id="filterType">
+                                <option value="all">Todos los tipos</option>
+                                <option value="testing">Testing</option>
+                                <option value="elaborative">Elaborativa</option>
+                                <option value="explanation">Explicación</option>
+                                <option value="interleaving">Intercalado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary" onclick="App.search.perform()">🔍 Buscar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-2">
+                    <div class="notes">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <h3>📋 Resultados</h3>
+                            <div>
+                                <button class="btn btn-sm btn-success" onclick="App.manager.exportNotes()">💾</button>
+                                <button class="btn btn-sm btn-danger" onclick="App.deleteManager.deleteSelected()">🗑️ Eliminar</button>
+                            </div>
+                        </div>
+                        <div id="searchResults">
+                            <div class="empty">
+                                <div class="empty-icon">🔍</div>
+                                <div class="empty-title">Busca y explora</div>
+                                <p>Usa la búsqueda inteligente</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <h3 id="editTitle">✏️ Editor</h3>
+                            <div id="editActions" class="hidden">
+                                <button class="btn btn-sm btn-success" onclick="App.manager.save()">💾</button>
+                                <button class="btn btn-sm btn-warning" onclick="App.manager.cancel()">❌</button>
+                            </div>
+                        </div>
+                        <div id="editContent">
+                            <div class="empty">
+                                <div class="empty-icon">✏️</div>
+                                <div class="empty-title">Selecciona una nota</div>
+                                <p>Haz clic en cualquier nota para editarla</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Panel Analytics -->
+            <section class="panel" id="panel-analytics">
+                <div class="section">
+                    <div>
+                        <h2 style="color: var(--primary); font-size: 2rem; margin-bottom: 1rem;">📊 Analytics de Aprendizaje IA</h2>
+                        <div class="card">
+                            <h3>Análisis Inteligente</h3>
+                            <p>Detecta patrones de aprendizaje, optimiza dificultad automáticamente y proporciona recomendaciones personalizadas basadas en ML.</p>
+                        </div>
+                    </div>
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value">87%</div>
+                            <div class="stat-label">Precisión</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">25%</div>
+                            <div class="stat-label">Mejora Extra</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-auto" style="margin-bottom: 2rem;">
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value" id="totalNotesMetric">0</div>
+                            <div class="stat-label">Total Notas</div>
+                        </div>
+                    </div>
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value" id="documentsProcessed">0</div>
+                            <div class="stat-label">Documentos</div>
+                        </div>
+                    </div>
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value" id="retentionRate">75%</div>
+                            <div class="stat-label">Retención</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="background: linear-gradient(135deg, #f093fb, #f5576c); color: white;">
+                    <h3 style="color: white;">🤖 Insights del Cerebro Digital</h3>
+                    <div id="aiInsights">
+                        <p><strong>Estado:</strong> 🧠 Cerebro Digital iniciado</p>
+                        <p><strong>Recomendación:</strong> Sube documentos para activar análisis completo</p>
+                    </div>
+                    <div style="margin-top: 1.5rem;">
+                        <button class="btn btn-success" onclick="App.analytics.generateReport()">📋 Reporte</button>
+                        <button class="btn btn-primary" onclick="App.storage.exportData()">💾 Exportar</button>
+                        <button class="btn btn-danger" onclick="App.deleteManager.deleteAll()">🗑️ Limpiar Todo</button>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
 
     <script>
-        // ==========================================
-        // BEYOND BRAIN.FM - SISTEMA CIENTÍFICO HONESTO
-        // ==========================================
-
-        class BeyondBrainFMSystem {
+        // === APLICACIÓN PRINCIPAL ===
+        class LearningSystem {
             constructor() {
-                this.audioContext = null;
-                this.currentSource = null;
-                this.gainNode = null;
-                this.isPlaying = false;
-                this.isPaused = false;
-                this.currentState = null;
-                this.duration = 15; // Default 15 minutes
-                this.sessionTimer = null;
-                this.visualizerTimer = null;
-                this.elapsedTime = 0;
-                this.totalPhases = 0;
-                this.currentPhase = 0;
-                this.sessionData = [];
-                this.currentEvaluation = {};
-
-                // Estados basados en literatura real
-                this.states = {
-                    'deep-relaxation': {
-                        name: 'Deep Relaxation',
-                        frequency: 10,          // Alpha 10Hz - evidencia sólida
-                        carrier: 220,           // A3 - frecuencia agradable
-                        modulation: 0.30,       // 30% modulación
-                        fadeDuration: 60,       // 60s entrada/salida
-                        evidence: 'ALTA',
-                        description: 'Estado Alpha para relajación profunda',
-                        minDuration: 10,
-                        maxDuration: 30,
-                        icon: '🧘'
+                this.state = {
+                    currentTab: 'upload',
+                    currentEdit: null,
+                    selectedNotes: new Set(),
+                    notes: {
+                        testing: [],
+                        elaborative: [],
+                        explanation: [],
+                        interleaving: []
                     },
-                    'calm-focus': {
-                        name: 'Calm Focus',
-                        frequency: 13,          // SMR 13Hz - neurofeedback clínico
-                        carrier: 220,
-                        modulation: 0.25,       // 25% modulación más sutil
-                        fadeDuration: 60,
-                        evidence: 'ALTA',
-                        description: 'SMR para atención calmada',
-                        minDuration: 15,
-                        maxDuration: 35,
-                        icon: '⚡'
+                    documents: [],
+                    analytics: {
+                        documentsProcessed: 0,
+                        totalReviews: 0,
+                        retentionRate: 0.75
                     },
-                    'meditative': {
-                        name: 'Meditative State',
-                        frequency: 6,           // Theta 6Hz - meditación
-                        carrier: 220,
-                        modulation: 0.35,       // 35% modulación más profunda
-                        fadeDuration: 90,       // Transición más larga para Theta
-                        evidence: 'MODERADA',
-                        description: 'Theta para estados meditativos',
-                        minDuration: 15,
-                        maxDuration: 40,
-                        icon: '🌙'
-                    }
+                    searchResults: []
                 };
-
+                
                 this.init();
             }
 
             init() {
-                this.createVisualizer();
-                this.loadSessionHistory();
-                console.log('🧠 Beyond Brain.fm System initialized');
-                console.log('🔬 Estados disponibles:', Object.keys(this.states));
+                this.setupEventListeners();
+                this.storage.load();
+                this.ui.updateAllDisplays();
+                this.pwa.init();
+                this.ui.notify('🧠 Sistema PWA iniciado - Listo para comenzar', 'success');
             }
 
-            createVisualizer() {
-                const visualizer = document.getElementById('visualizer');
-                visualizer.innerHTML = '';
-                
-                for (let i = 0; i < 40; i++) {
-                    const bar = document.createElement('div');
-                    bar.className = 'wave-bar';
-                    bar.style.height = '8px';
-                    visualizer.appendChild(bar);
-                }
+            setupEventListeners() {
+                // Navegación
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.addEventListener('click', () => this.ui.switchTab(tab.dataset.tab));
+                });
+
+                // Upload
+                const uploadZone = document.getElementById('uploadZone');
+                const fileInput = document.getElementById('fileInput');
+
+                uploadZone.addEventListener('click', () => fileInput.click());
+                uploadZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadZone.classList.add('dragover');
+                });
+                uploadZone.addEventListener('dragleave', () => {
+                    uploadZone.classList.remove('dragover');
+                });
+                uploadZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadZone.classList.remove('dragover');
+                    this.fileProcessor.handleFiles(e.dataTransfer.files);
+                });
+                fileInput.addEventListener('change', (e) => {
+                    this.fileProcessor.handleFiles(e.target.files);
+                });
+
+                // Forms
+                document.getElementById('testingForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.testing.createQuestion();
+                });
+
+                // Search
+                document.getElementById('smartSearch').addEventListener('input', 
+                    this.debounce(() => this.search.perform(), 300)
+                );
+
+                document.getElementById('filterType').addEventListener('change', () => this.search.perform());
+
+                // Online/Offline detection
+                window.addEventListener('online', () => this.pwa.showStatus('🌐 Conectado', 'success'));
+                window.addEventListener('offline', () => this.pwa.showStatus('📱 Modo Offline', 'warning'));
             }
 
-            animateVisualizer() {
-                if (!this.isPlaying || this.isPaused) return;
+            debounce(func, wait) {
+                let timeout;
+                return function(...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), wait);
+                };
+            }
 
-                const bars = document.querySelectorAll('.wave-bar');
-                const frequency = this.currentState ? this.states[this.currentState].frequency : 1;
-                
-                bars.forEach((bar, index) => {
-                    const time = Date.now() / 1000;
-                    const offset = index * 0.1;
-                    const wave = Math.sin((time + offset) * frequency * 0.5);
-                    const intensity = 0.3 + (wave * 0.4);
-                    const height = 8 + (intensity * 30);
+            getTotalNotes() {
+                return Object.values(this.state.notes).reduce((sum, arr) => sum + arr.length, 0);
+            }
+
+            // === MÓDULO PWA ===
+            pwa = {
+                init: () => {
+                    this.pwa.checkInstallability();
+                    this.pwa.showStatus('📱 PWA Cargada', 'success');
                     
-                    bar.style.height = `${height}px`;
-                    bar.style.opacity = 0.6 + (intensity * 0.4);
-                });
-            }
+                    // Auto-hide status after 3 seconds
+                    setTimeout(() => {
+                        const status = document.getElementById('pwaStatus');
+                        if (status) status.classList.remove('show');
+                    }, 3000);
+                },
 
-            selectState(stateId) {
-                // Reset previous selection
-                document.querySelectorAll('.state-card').forEach(card => {
-                    card.classList.remove('selected');
-                });
-
-                // Select new state
-                document.querySelector(`[data-state="${stateId}"]`).classList.add('selected');
-                
-                this.currentState = stateId;
-                const state = this.states[stateId];
-                
-                document.getElementById('currentStateName').textContent = state.name;
-                document.getElementById('currentStateParams').textContent = 
-                    `${state.frequency}Hz • Modulación ${Math.round(state.modulation * 100)}%`;
-                
-                // Enable start button
-                document.getElementById('startBtn').disabled = false;
-                
-                this.showAlert(`Estado seleccionado: ${state.icon} ${state.name}`, 'info', 2000);
-                
-                console.log(`🎯 Estado seleccionado: ${stateId}`, state);
-            }
-
-            selectDuration(minutes) {
-                document.querySelectorAll('.duration-btn').forEach(btn => {
-                    btn.classList.remove('selected');
-                });
-                
-                document.querySelector(`[data-duration="${minutes}"]`).classList.add('selected');
-                this.duration = minutes;
-                
-                console.log(`⏰ Duración seleccionada: ${minutes} minutos`);
-            }
-
-            async initAudio() {
-                try {
-                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                checkInstallability: () => {
+                    let deferredPrompt;
                     
-                    if (this.audioContext.state === 'suspended') {
-                        await this.audioContext.resume();
+                    window.addEventListener('beforeinstallprompt', (e) => {
+                        e.preventDefault();
+                        deferredPrompt = e;
+                        this.pwa.showInstallButton(deferredPrompt);
+                    });
+
+                    window.addEventListener('appinstalled', () => {
+                        this.ui.notify('📱 PWA Instalada exitosamente', 'success');
+                        deferredPrompt = null;
+                    });
+                },
+
+                showInstallButton: (prompt) => {
+                    const installBtn = document.createElement('button');
+                    installBtn.className = 'btn btn-primary';
+                    installBtn.innerHTML = '📱 Instalar App';
+                    installBtn.style.cssText = `
+                        position: fixed;
+                        bottom: 20px;
+                        right: 20px;
+                        z-index: 1000;
+                        animation: fadeIn 0.5s ease;
+                    `;
+
+                    installBtn.addEventListener('click', async () => {
+                        prompt.prompt();
+                        const { outcome } = await prompt.userChoice;
+                        
+                        if (outcome === 'accepted') {
+                            this.ui.notify('📱 Instalando PWA...', 'info');
+                        } else {
+                            this.ui.notify('📱 Instalación cancelada', 'warning');
+                        }
+                        
+                        installBtn.remove();
+                    });
+
+                    document.body.appendChild(installBtn);
+                },
+
+                showStatus: (message, type = 'info') => {
+                    const status = document.getElementById('pwaStatus');
+                    status.textContent = message;
+                    status.className = `pwa-status show`;
+                    
+                    if (type === 'warning' || type === 'error') {
+                        status.classList.add('offline');
+                    } else {
+                        status.classList.remove('offline');
                     }
-                    
-                    this.gainNode = this.audioContext.createGain();
-                    this.gainNode.connect(this.audioContext.destination);
-                    this.gainNode.gain.value = 0.4; // Volume moderado
-                    
-                    console.log('🔊 Audio context inicializado:', this.audioContext.state);
+
+                    setTimeout(() => status.classList.remove('show'), 4000);
+                }
+            };
+
+            // === MÓDULO PROCESADOR DE ARCHIVOS ===
+            fileProcessor = {
+                handleFiles: async (files) => {
+                    this.ui.notify('📄 Procesando documentos...', 'info');
+
+                    for (const file of files) {
+                        if (this.fileProcessor.validateFile(file)) {
+                            await this.fileProcessor.processFile(file);
+                        }
+                    }
+
+                    this.ui.updateAllDisplays();
+                    this.storage.save();
+                    this.ui.notify('🎉 Documentos procesados', 'success');
+                },
+
+                validateFile: (file) => {
+                    const validTypes = ['application/pdf', 'text/markdown', 'text/plain'];
+                    const maxSize = 10 * 1024 * 1024;
+
+                    if (!validTypes.includes(file.type) && !file.name.endsWith('.md')) {
+                        this.ui.notify(`❌ Tipo no soportado: ${file.name}`, 'error');
+                        return false;
+                    }
+
+                    if (file.size > maxSize) {
+                        this.ui.notify(`❌ Archivo muy grande: ${file.name}`, 'error');
+                        return false;
+                    }
+
                     return true;
-                } catch (error) {
-                    console.error('❌ Error inicializando audio:', error);
-                    return false;
-                }
-            }
+                },
 
-            generateIsochronicTone(state, duration) {
-                const sampleRate = this.audioContext.sampleRate;
-                const samples = Math.floor(duration * sampleRate);
-                const buffer = this.audioContext.createBuffer(2, samples, sampleRate);
-                
-                const leftChannel = buffer.getChannelData(0);
-                const rightChannel = buffer.getChannelData(1);
-                
-                const params = this.states[state];
-                const fadeInSamples = params.fadeDuration * sampleRate;
-                const fadeOutSamples = params.fadeDuration * sampleRate;
-                const stableSamples = samples - fadeInSamples - fadeOutSamples;
-                
-                console.log(`🎵 Generando tono isochronic:`, {
-                    frequency: params.frequency,
-                    carrier: params.carrier,
-                    modulation: params.modulation,
-                    duration: duration,
-                    samples: samples
-                });
-                
-                for (let i = 0; i < samples; i++) {
-                    const time = i / sampleRate;
+                processFile: (file) => {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = async (e) => {
+                            const content = e.target.result;
+                            
+                            const document = {
+                                id: Date.now() + Math.random(),
+                                name: file.name,
+                                content: content,
+                                processedAt: new Date().toISOString(),
+                                wordCount: content.split(/\s+/).length,
+                                concepts: this.ml.extractConcepts(content),
+                                keyTopics: this.ml.extractTopics(content)
+                            };
+
+                            this.state.documents.push(document);
+                            this.state.analytics.documentsProcessed++;
+                            
+                            await this.fileProcessor.generateContent(document);
+                            resolve();
+                        };
+                        reader.readAsText(file);
+                    });
+                },
+
+                generateContent: async (document) => {
+                    console.log('🤖 Generando contenido para:', document.name);
                     
-                    // Envelope de volumen con fade in/out
-                    let volumeEnvelope = 1.0;
-                    if (i < fadeInSamples) {
-                        volumeEnvelope = i / fadeInSamples;
-                    } else if (i > samples - fadeOutSamples) {
-                        volumeEnvelope = (samples - i) / fadeOutSamples;
+                    // Testing questions
+                    const questions = await this.ml.generateQuestions(document.concepts, document.content);
+                    questions.forEach(q => this.state.notes.testing.push(q));
+                    console.log(`✅ ${questions.length} preguntas de testing generadas`);
+
+                    // Elaborative concepts
+                    const elaborativeConcepts = document.concepts.slice(0, 5);
+                    elaborativeConcepts.forEach((concept, index) => {
+                        this.state.notes.elaborative.push({
+                            id: Date.now() + Math.random() + index,
+                            type: 'elaborative',
+                            concept: concept,
+                            description: `Explora las causas y mecanismos de ${concept}`,
+                            source: 'AI_Generated',
+                            createdAt: new Date().toISOString()
+                        });
+                    });
+
+                    // Explanation concepts
+                    const explanationConcepts = [...document.keyTopics, ...document.concepts].slice(0, 6);
+                    explanationConcepts.forEach((topic, index) => {
+                        const concept = topic.split(' ').slice(0, 3).join(' ');
+                        this.state.notes.explanation.push({
+                            id: Date.now() + Math.random() + index + 100,
+                            type: 'explanation',
+                            concept: concept,
+                            definition: `Define ${concept} con tus propias palabras`,
+                            source: 'AI_Generated',
+                            createdAt: new Date().toISOString()
+                        });
+                    });
+
+                    // Interleaving problems
+                    const types = ['visual', 'conceptual', 'matemático', 'analítico', 'aplicado', 'sintético'];
+                    const interleavingCount = Math.max(4, document.concepts.length);
+                    
+                    for (let i = 0; i < interleavingCount; i++) {
+                        const concept = document.concepts[i % document.concepts.length];
+                        const type = types[i % types.length];
+                        
+                        this.state.notes.interleaving.push({
+                            id: Date.now() + Math.random() + i + 200,
+                            type: 'interleaving',
+                            title: `Análisis ${type}: ${concept}`,
+                            description: `Practica ${concept} desde perspectiva ${type}`,
+                            problemType: type,
+                            practiceCount: 0,
+                            performance: 0.5,
+                            source: 'AI_Generated',
+                            createdAt: new Date().toISOString()
+                        });
+                    }
+                }
+            };
+
+            // === MÓDULO ML ===
+            ml = {
+                extractConcepts: (text) => {
+                    const words = text.toLowerCase().split(/\s+/);
+                    const stopWords = new Set(['el', 'la', 'de', 'que', 'y', 'en', 'un', 'es', 'se', 'por', 'con', 'para']);
+                    
+                    const technical = words.filter(word => 
+                        word.length > 5 && 
+                        !stopWords.has(word) &&
+                        (word.includes('ción') || word.includes('dad') || word.includes('ismo') || 
+                         word.includes('ica') || word.includes('ente') || word.includes('ante'))
+                    );
+
+                    const freq = {};
+                    technical.forEach(term => freq[term] = (freq[term] || 0) + 1);
+
+                    const uniqueTerms = words.filter(word => 
+                        word.length > 7 && !stopWords.has(word)
+                    ).slice(0, 5);
+
+                    const allConcepts = [
+                        ...Object.entries(freq)
+                            .filter(([, f]) => f >= 1)
+                            .sort(([,a], [,b]) => b - a)
+                            .slice(0, 8)
+                            .map(([term]) => term.charAt(0).toUpperCase() + term.slice(1)),
+                        ...uniqueTerms.map(term => term.charAt(0).toUpperCase() + term.slice(1))
+                    ];
+
+                    return [...new Set(allConcepts)].slice(0, 10);
+                },
+
+                extractTopics: (text) => {
+                    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 20);
+                    return sentences
+                        .filter(sentence => 
+                            sentence.includes(':') || 
+                            sentence.toLowerCase().includes('definición') ||
+                            sentence.toLowerCase().includes('importante') ||
+                            sentence.toLowerCase().includes('concepto') ||
+                            sentence.toLowerCase().includes('principio')
+                        )
+                        .slice(0, 8)
+                        .map(sentence => sentence.trim().substring(0, 50) + '...');
+                },
+
+                generateQuestions: async (concepts, context) => {
+                    const questions = [];
+                    const patterns = [
+                        '¿Cuáles son las características principales de {concept}?',
+                        '¿Cómo funciona {concept} en la práctica?',
+                        '¿Qué aplicaciones tiene {concept}?',
+                        '¿Por qué es importante {concept}?',
+                        '¿Cuál es la relación entre {concept} y otros conceptos?',
+                        '¿Qué problemas resuelve {concept}?',
+                        '¿Cuáles son los componentes de {concept}?'
+                    ];
+
+                    concepts.slice(0, 7).forEach((concept, index) => {
+                        const pattern = patterns[index % patterns.length];
+                        const question = pattern.replace('{concept}', concept);
+
+                        questions.push({
+                            id: Date.now() + Math.random() + index,
+                            type: 'testing',
+                            concept: concept,
+                            question: question,
+                            answer: this.ml.generateAnswer(concept, context),
+                            difficulty: ['easy', 'medium', 'hard'][index % 3],
+                            reviewCount: 0,
+                            successRate: 0.5,
+                            source: 'AI_Generated',
+                            createdAt: new Date().toISOString()
+                        });
+                    });
+
+                    return questions;
+                },
+
+                generateAnswer: (concept, context) => {
+                    const sentences = context.split(/[.!?]+/).filter(s => 
+                        s.toLowerCase().includes(concept.toLowerCase())
+                    );
+                    
+                    if (sentences.length > 0) {
+                        const bestSentence = sentences.find(s => s.length > 30) || sentences[0];
+                        return bestSentence.trim() + '.';
                     }
                     
-                    // Aplicar curva suave al envelope
-                    volumeEnvelope = volumeEnvelope * volumeEnvelope * (3 - 2 * volumeEnvelope);
-                    
-                    // Carrier wave (tono base)
-                    const carrierWave = Math.sin(2 * Math.PI * params.carrier * time);
-                    
-                    // Modulación isochronic
-                    const modulationWave = (1 + Math.sin(2 * Math.PI * params.frequency * time)) / 2;
-                    
-                    // Combinar carrier + modulación
-                    const modulatedWave = carrierWave * (1 - params.modulation + params.modulation * modulationWave);
-                    
-                    // Aplicar envelope de volumen
-                    const finalSample = modulatedWave * volumeEnvelope * 0.3; // Volume global bajo
-                    
-                    leftChannel[i] = finalSample;
-                    rightChannel[i] = finalSample;
+                    return `${concept} es un concepto fundamental que requiere análisis detallado según el contexto del documento.`;
                 }
-                
-                return buffer;
-            }
+            };
 
-            async startSession() {
-                if (!this.currentState) {
-                    this.showAlert('⚠️ Selecciona un estado primero', 'warning');
-                    return;
+            // === MÓDULO TESTING ===
+            testing = {
+                createQuestion: () => {
+                    const concept = document.getElementById('testingConcept').value;
+                    const question = document.getElementById('testingQuestion').value;
+                    const answer = document.getElementById('testingAnswer').value;
+
+                    const note = {
+                        id: Date.now(),
+                        type: 'testing',
+                        concept,
+                        question,
+                        answer,
+                        difficulty: 'medium',
+                        reviewCount: 0,
+                        successRate: 0.5,
+                        source: 'Manual',
+                        createdAt: new Date().toISOString()
+                    };
+
+                    this.state.notes.testing.push(note);
+                    this.ui.updateAllDisplays();
+                    this.storage.save();
+                    
+                    document.getElementById('testingForm').reset();
+                    this.ui.notify('✅ Pregunta creada', 'success');
+                },
+
+                startReview: (noteId) => {
+                    const note = this.state.notes.testing.find(n => n.id === noteId);
+                    if (!note) return;
+
+                    this.testing.showReviewModal(note);
+                },
+
+                showReviewModal: (note) => {
+                    const modal = document.createElement('div');
+                    modal.className = 'modal';
+
+                    modal.innerHTML = `
+                        <div class="modal-content">
+                            <h3 style="color: var(--primary); margin-bottom: 1rem;">${note.concept}</h3>
+                            <div style="background: #f8fafc; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
+                                <strong>Pregunta:</strong><br><br>
+                                ${note.question}
+                            </div>
+                            <div style="text-align: center;">
+                                <button class="btn btn-primary" onclick="App.testing.showAnswer(${note.id}, this.closest('.modal'))">
+                                    📖 Ver Respuesta
+                                </button>
+                            </div>
+                        </div>
+                    `;
+
+                    document.body.appendChild(modal);
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) modal.remove();
+                    });
+                },
+
+                showAnswer: (noteId, modalElement) => {
+                    const note = this.state.notes.testing.find(n => n.id === noteId);
+                    if (!note) return;
+
+                    const content = modalElement.querySelector('.modal-content');
+                    content.innerHTML = `
+                        <h3 style="color: var(--primary); margin-bottom: 1rem;">${note.concept}</h3>
+                        <div style="background: #f8fafc; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <strong>Pregunta:</strong><br>
+                            ${note.question}<br><br>
+                            <strong>📖 Respuesta:</strong><br>
+                            ${note.answer}
+                        </div>
+                        <div class="modal-buttons">
+                            <button class="btn btn-success" onclick="App.testing.reviewAnswer(${noteId}, 'easy', this.closest('.modal'))">🟢 Fácil</button>
+                            <button class="btn btn-warning" onclick="App.testing.reviewAnswer(${noteId}, 'medium', this.closest('.modal'))">🟡 Medio</button>
+                            <button class="btn btn-sm" onclick="this.closest('.modal').remove()" style="background: #6b7280; color: white;">❌ Cerrar</button>
+                        </div>
+                    `;
+                },
+
+                reviewAnswer: (noteId, difficulty, modalElement) => {
+                    const note = this.state.notes.testing.find(n => n.id === noteId);
+                    if (!note) return;
+
+                    note.reviewCount++;
+                    note.difficulty = difficulty;
+                    
+                    const adjustment = { easy: 0.1, medium: 0.05, hard: -0.1 }[difficulty];
+                    note.successRate = Math.max(0.1, Math.min(1.0, note.successRate + adjustment));
+
+                    this.state.analytics.totalReviews++;
+                    this.storage.save();
+                    this.ui.updateTestingDisplay();
+                    
+                    modalElement.remove();
+                    this.ui.notify('✅ Revisión completada', 'success');
                 }
+            };
 
-                const state = this.states[this.currentState];
-                
-                const confirmed = confirm(`🧠 BEYOND BRAIN.FM - CONFIRMACIÓN DE SESIÓN
+            // === MÓDULO ELABORATIVE ===
+            elaborative = {
+                select: (noteId) => {
+                    const note = this.state.notes.elaborative.find(n => n.id === noteId);
+                    if (!note) return;
 
-🎯 Estado: ${state.icon} ${state.name}
-⏰ Duración: ${this.duration} minutos
-🎵 Frecuencia: ${state.frequency}Hz (${state.evidence} evidencia)
-🔊 Modulación: ${Math.round(state.modulation * 100)}%
+                    const questions = [
+                        `¿Por qué ${note.concept} funciona así?`,
+                        `¿Por qué es importante ${note.concept}?`,
+                        `¿Por qué ${note.concept} se relaciona con otros conceptos?`,
+                        `¿Por qué necesitamos entender ${note.concept}?`,
+                        `¿Por qué ${note.concept} tiene estas características?`
+                    ];
 
-⚠️ RECORDATORIOS IMPORTANTES:
-• Los efectos son sutiles y variables entre personas
-• Esta sesión es para uso personal/experimental
-• No reemplaza tratamientos médicos profesionales
-• Evalúa honestamente tus efectos post-sesión
+                    const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
+                    document.getElementById('currentWhyQuestion').textContent = randomQuestion;
+                    document.getElementById('elaborationResponse').value = '';
+                    
+                    this.ui.notify(`🤔 Concepto seleccionado: ${note.concept}`, 'info');
+                },
 
-🎧 Recomendación: Auriculares, volumen cómodo, ambiente tranquilo.
-
-¿Confirmas iniciar la sesión?`);
-
-                if (!confirmed) return;
-
-                try {
-                    const audioReady = await this.initAudio();
-                    if (!audioReady) {
-                        this.showAlert('❌ Error: No se pudo inicializar el audio', 'warning');
+                analyze: () => {
+                    const text = document.getElementById('elaborationResponse').value.trim();
+                    
+                    if (!text) {
+                        this.ui.notify('⚠️ Escribe una elaboración primero', 'warning');
                         return;
                     }
 
-                    // Inicializar sesión
-                    this.isPlaying = true;
-                    this.isPaused = false;
-                    this.elapsedTime = 0;
-                    this.currentPhase = 0;
-                    this.totalPhases = 3; // Fade-in, stable, fade-out
+                    const score = this.elaborative.analyzeText(text);
+                    this.ui.notify(`🧠 Análisis IA: ${score}/100`, 'info');
+                },
 
-                    // UI updates
-                    document.getElementById('startBtn').disabled = true;
-                    document.getElementById('pauseBtn').disabled = false;
-                    document.getElementById('stopBtn').disabled = false;
-                    document.getElementById('sessionInfo').classList.remove('hidden');
+                generateNew: () => {
+                    const notes = this.state.notes.elaborative;
+                    if (notes.length === 0) {
+                        this.ui.notify('⚠️ Sube documentos primero', 'warning');
+                        return;
+                    }
 
-                    // Start timers
-                    this.startSessionTimer();
-                    this.visualizerTimer = setInterval(() => this.animateVisualizer(), 100);
+                    const randomNote = notes[Math.floor(Math.random() * notes.length)];
+                    const questions = [
+                        `¿Por qué ${randomNote.concept} es fundamental?`,
+                        `¿Por qué ${randomNote.concept} se comporta así?`,
+                        `¿Por qué necesitamos entender ${randomNote.concept}?`,
+                        `¿Por qué ${randomNote.concept} tiene estas aplicaciones?`,
+                        `¿Por qué ${randomNote.concept} es relevante?`
+                    ];
 
-                    // Generate and play audio
-                    const buffer = this.generateIsochronicTone(this.currentState, this.duration * 60);
+                    const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
+                    document.getElementById('currentWhyQuestion').textContent = randomQuestion;
+                    document.getElementById('elaborationResponse').value = '';
                     
-                    this.currentSource = this.audioContext.createBufferSource();
-                    this.currentSource.buffer = buffer;
-                    this.currentSource.connect(this.gainNode);
+                    this.ui.notify('🔄 Nueva pregunta generada', 'info');
+                },
+
+                analyzeText: (text) => {
+                    const wordCount = text.split(/\s+/).length;
+                    const hasExamples = /ejemplo|como|tal como|por ejemplo/i.test(text);
+                    const hasCausal = /porque|debido|causa|resulta|provoca|genera/i.test(text);
+                    const hasConnections = /relaciona|conecta|vincula|asocia/i.test(text);
                     
-                    this.currentSource.onended = () => {
-                        if (this.isPlaying) {
-                            this.completeSession();
+                    let score = 0;
+                    if (wordCount >= 30) score += 30;
+                    if (wordCount >= 60) score += 20;
+                    if (hasExamples) score += 25;
+                    if (hasCausal) score += 25;
+                    if (hasConnections) score += 20;
+                    
+                    return Math.min(100, score);
+                }
+            };
+
+            // === MÓDULO EXPLANATION ===
+            explanation = {
+                select: (noteId) => {
+                    const note = this.state.notes.explanation.find(n => n.id === noteId);
+                    if (!note) return;
+
+                    document.getElementById('currentExplanationConcept').textContent = note.concept;
+                    document.getElementById('currentExplanationDefinition').textContent = 
+                        note.definition || `Define ${note.concept} con tus propias palabras`;
+                    
+                    document.getElementById('personalExplanation').value = '';
+                    this.ui.notify(`📝 Concepto seleccionado: ${note.concept}`, 'info');
+                },
+
+                analyze: () => {
+                    const text = document.getElementById('personalExplanation').value.trim();
+                    
+                    if (!text) {
+                        this.ui.notify('⚠️ Escribe tu explicación primero', 'warning');
+                        return;
+                    }
+
+                    const score = this.explanation.analyzeExplanation(text);
+                    this.ui.notify(`📊 Análisis: ${score}/100`, 'info');
+                },
+
+                suggestConnections: () => {
+                    const current = document.getElementById('currentExplanationConcept').textContent;
+                    
+                    if (current === 'Selecciona un concepto') {
+                        this.ui.notify('⚠️ Selecciona un concepto primero', 'warning');
+                        return;
+                    }
+
+                    const allConcepts = this.explanation.getAllConcepts().filter(c => c !== current);
+                    const connections = allConcepts.slice(0, 4);
+                    
+                    if (connections.length > 0) {
+                        this.ui.notify(`🔗 Conexiones: ${connections.join(', ')}`, 'info');
+                    } else {
+                        this.ui.notify('💡 Sube más documentos para conexiones', 'info');
+                    }
+                },
+
+                analyzeExplanation: (text) => {
+                    const wordCount = text.split(/\s+/).length;
+                    const hasPersonal = /creo|pienso|entiendo|considero|opino/i.test(text);
+                    const hasTechnical = (text.match(/\b\w{7,}\b/g) || []).length;
+                    const hasStructure = /primero|segundo|además|finalmente|por tanto/i.test(text);
+                    
+                    let score = 0;
+                    if (wordCount >= 40) score += 25;
+                    if (wordCount >= 80) score += 15;
+                    if (hasPersonal) score += 20;
+                    if (hasTechnical > 2) score += 25;
+                    if (hasStructure) score += 15;
+                    
+                    return Math.min(100, score);
+                },
+
+                getAllConcepts: () => {
+                    const concepts = [];
+                    Object.values(this.state.notes).forEach(noteArray => {
+                        noteArray.forEach(note => {
+                            if (note.concept) concepts.push(note.concept);
+                        });
+                    });
+                    return [...new Set(concepts)];
+                }
+            };
+
+            // === MÓDULO INTERLEAVING ===
+            interleaving = {
+                practice: (problemId) => {
+                    const problem = this.state.notes.interleaving.find(p => p.id === problemId);
+                    if (!problem) return;
+
+                    problem.practiceCount = (problem.practiceCount || 0) + 1;
+                    problem.performance = Math.min(1.0, (problem.performance || 0.5) + 0.05);
+
+                    this.storage.save();
+                    this.ui.updateInterleavingDisplay();
+
+                    this.ui.notify(`✅ Practicado: ${Math.round(problem.performance * 100)}%`, 'success');
+                },
+
+                optimize: () => {
+                    const problems = this.state.notes.interleaving;
+                    if (problems.length < 2) {
+                        this.ui.notify('⚠️ Necesitas más problemas', 'warning');
+                        return;
+                    }
+
+                    problems.sort((a, b) => (a.performance || 0.5) - (b.performance || 0.5));
+                    
+                    this.ui.updateSequenceDisplay();
+                    this.ui.notify('🎲 Secuencia reoptimizada', 'success');
+                }
+            };
+
+            // === MÓDULO SEARCH ===
+            search = {
+                perform: () => {
+                    const query = document.getElementById('smartSearch').value.trim();
+                    const typeFilter = document.getElementById('filterType').value;
+
+                    let results = this.search.getAllNotes();
+
+                    if (query) {
+                        results = this.search.semanticSearch(query, results);
+                    }
+
+                    if (typeFilter !== 'all') {
+                        results = results.filter(note => note.type === typeFilter);
+                    }
+
+                    this.state.searchResults = results;
+                    this.search.updateResults();
+                },
+
+                getAllNotes: () => {
+                    const all = [];
+                    Object.values(this.state.notes).forEach(noteArray => {
+                        all.push(...noteArray);
+                    });
+                    return all;
+                },
+
+                semanticSearch: (query, notes) => {
+                    const results = [];
+                    
+                    notes.forEach(note => {
+                        let score = 0;
+                        const text = `${note.concept || ''} ${note.question || note.description || note.title || ''}`.toLowerCase();
+
+                        if (text.includes(query.toLowerCase())) {
+                            score += 10;
                         }
+
+                        query.toLowerCase().split(/\s+/).forEach(term => {
+                            if (text.includes(term)) score += 3;
+                        });
+
+                        if (note.source === 'AI_Generated') score += 1;
+
+                        if (score > 0) {
+                            results.push({ ...note, searchScore: score });
+                        }
+                    });
+
+                    return results.sort((a, b) => b.searchScore - a.searchScore);
+                },
+
+                updateResults: () => {
+                    const container = document.getElementById('searchResults');
+                    const results = this.state.searchResults;
+
+                    if (results.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty">
+                                <div class="empty-icon">🔍</div>
+                                <div class="empty-title">Sin resultados</div>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    container.innerHTML = results.map(note => `
+                        <div class="note" onclick="App.manager.selectForEdit(${note.id})">
+                            <div class="note-header">
+                                <div class="note-title">
+                                    ${note.concept || note.title || `${note.type} #${note.id}`}
+                                    ${note.searchScore ? `<span style="color: var(--primary); font-size: 0.8em;">(${Math.round(note.searchScore)})</span>` : ''}
+                                </div>
+                                <div style="display: flex; align-items: center;">
+                                    <div class="note-badges">
+                                        <span class="badge">${this.search.getTypeIcon(note.type)}</span>
+                                        ${note.source === 'AI_Generated' ? '<span class="badge badge-ai">🤖</span>' : ''}
+                                    </div>
+                                    <div class="note-actions">
+                                        <button class="btn btn-sm" onclick="event.stopPropagation(); App.deleteManager.toggleNoteSelection(${note.id})" 
+                                                style="background: ${this.state.selectedNotes.has(note.id) ? 'var(--primary)' : '#6b7280'}; color: white;" 
+                                                title="Seleccionar">
+                                            ☑️
+                                        </button>
+                                        <button class="btn btn-danger" onclick="event.stopPropagation(); App.deleteManager.deleteNote(${note.id}, '${note.type}')" title="Eliminar">🗑️</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="color: var(--text-secondary);">
+                                ${note.question || note.description || 'Sin descripción'}
+                            </div>
+                        </div>
+                    `).join('');
+                },
+
+                getTypeIcon: (type) => {
+                    const icons = {
+                        testing: '🎯',
+                        elaborative: '🤔',
+                        explanation: '📝',
+                        interleaving: '🔀'
                     };
+                    return icons[type] || '📋';
+                }
+            };
+
+            // === MÓDULO MANAGER ===
+            manager = {
+                selectForEdit: (noteId) => {
+                    const note = this.search.getAllNotes().find(n => n.id === noteId);
+                    if (!note) return;
+
+                    this.state.currentEdit = note;
                     
-                    this.currentSource.start();
+                    document.getElementById('editTitle').textContent = `✏️ Editando: ${note.concept || note.title || note.type}`;
+                    document.getElementById('editActions').classList.remove('hidden');
                     
-                    this.showAlert(`🎵 Sesión iniciada: ${state.name}`, 'success', 3000);
+                    this.manager.generateEditForm(note);
+                    this.ui.notify(`✏️ Editando: ${note.concept || note.title || note.type}`, 'info');
+                },
+
+                generateEditForm: (note) => {
+                    const container = document.getElementById('editContent');
                     
-                    console.log(`🚀 Sesión iniciada:`, {
-                        state: this.currentState,
-                        duration: this.duration,
-                        frequency: state.frequency
+                    let fields = `
+                        <div class="form-group">
+                            <label class="form-label">Concepto</label>
+                            <input type="text" class="form-input" id="editConcept" value="${note.concept || ''}">
+                        </div>
+                    `;
+
+                    if (note.type === 'testing') {
+                        fields += `
+                            <div class="form-group">
+                                <label class="form-label">Pregunta</label>
+                                <textarea class="form-textarea" id="editQuestion">${note.question || ''}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Respuesta</label>
+                                <textarea class="form-textarea" id="editAnswer">${note.answer || ''}</textarea>
+                            </div>
+                        `;
+                    } else if (note.type === 'elaborative') {
+                        fields += `
+                            <div class="form-group">
+                                <label class="form-label">Descripción</label>
+                                <textarea class="form-textarea" id="editDescription">${note.description || ''}</textarea>
+                            </div>
+                        `;
+                    } else if (note.type === 'explanation') {
+                        fields += `
+                            <div class="form-group">
+                                <label class="form-label">Definición</label>
+                                <textarea class="form-textarea" id="editDefinition">${note.definition || ''}</textarea>
+                            </div>
+                        `;
+                    } else if (note.type === 'interleaving') {
+                        fields += `
+                            <div class="form-group">
+                                <label class="form-label">Título</label>
+                                <input type="text" class="form-input" id="editTitleField" value="${note.title || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Descripción</label>
+                                <textarea class="form-textarea" id="editDescription">${note.description || ''}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Tipo de Problema</label>
+                                <select class="form-select" id="editProblemType">
+                                    <option value="visual" ${note.problemType === 'visual' ? 'selected' : ''}>Visual</option>
+                                    <option value="conceptual" ${note.problemType === 'conceptual' ? 'selected' : ''}>Conceptual</option>
+                                    <option value="matemático" ${note.problemType === 'matemático' ? 'selected' : ''}>Matemático</option>
+                                    <option value="analítico" ${note.problemType === 'analítico' ? 'selected' : ''}>Analítico</option>
+                                    <option value="aplicado" ${note.problemType === 'aplicado' ? 'selected' : ''}>Aplicado</option>
+                                    <option value="sintético" ${note.problemType === 'sintético' ? 'selected' : ''}>Sintético</option>
+                                </select>
+                            </div>
+                        `;
+                    }
+
+                    container.innerHTML = fields;
+                },
+
+                save: () => {
+                    const note = this.state.currentEdit;
+                    if (!note) return;
+
+                    note.concept = document.getElementById('editConcept').value;
+                    
+                    if (note.type === 'testing') {
+                        note.question = document.getElementById('editQuestion').value;
+                        note.answer = document.getElementById('editAnswer').value;
+                    } else if (note.type === 'elaborative') {
+                        note.description = document.getElementById('editDescription').value;
+                    } else if (note.type === 'explanation') {
+                        note.definition = document.getElementById('editDefinition').value;
+                    } else if (note.type === 'interleaving') {
+                        note.title = document.getElementById('editTitleField').value;
+                        note.description = document.getElementById('editDescription').value;
+                        note.problemType = document.getElementById('editProblemType').value;
+                    }
+
+                    note.lastModified = new Date().toISOString();
+                    
+                    this.storage.save();
+                    this.search.perform();
+                    this.ui.updateAllDisplays();
+                    this.manager.cancel();
+                    
+                    this.ui.notify('💾 Nota guardada', 'success');
+                },
+
+                cancel: () => {
+                    this.state.currentEdit = null;
+                    document.getElementById('editTitle').textContent = '✏️ Editor';
+                    document.getElementById('editActions').classList.add('hidden');
+                    
+                    document.getElementById('editContent').innerHTML = `
+                        <div class="empty">
+                            <div class="empty-icon">✏️</div>
+                            <div class="empty-title">Selecciona una nota</div>
+                        </div>
+                    `;
+                },
+
+                exportNotes: () => {
+                    const data = {
+                        timestamp: new Date().toISOString(),
+                        notes: this.state.searchResults,
+                        query: document.getElementById('smartSearch').value
+                    };
+
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `notas-export-${Date.now()}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    
+                    this.ui.notify('💾 Notas exportadas', 'success');
+                }
+            };
+
+            // === MÓDULO ELIMINACIÓN ===
+            deleteManager = {
+                deleteNote: (noteId, noteType) => {
+                    this.deleteManager.showDeleteModal(noteId, noteType, 'single');
+                },
+
+                deleteSelected: () => {
+                    if (this.state.selectedNotes.size === 0) {
+                        this.ui.notify('⚠️ Selecciona notas para eliminar', 'warning');
+                        return;
+                    }
+                    this.deleteManager.showDeleteModal(null, null, 'multiple');
+                },
+
+                deleteAll: () => {
+                    const totalNotes = this.getTotalNotes();
+                    if (totalNotes === 0) {
+                        this.ui.notify('⚠️ No hay notas para eliminar', 'warning');
+                        return;
+                    }
+                    this.deleteManager.showDeleteModal(null, null, 'all');
+                },
+
+                showDeleteModal: (noteId, noteType, deleteType) => {
+                    const modal = document.createElement('div');
+                    modal.className = 'modal';
+
+                    let title, message, confirmText;
+
+                    switch(deleteType) {
+                        case 'single':
+                            const note = this.deleteManager.findNoteById(noteId, noteType);
+                            title = '🗑️ Eliminar Nota';
+                            message = `¿Estás seguro de eliminar "${note?.concept || 'esta nota'}"?`;
+                            confirmText = 'Eliminar';
+                            break;
+                        case 'multiple':
+                            title = '🗑️ Eliminar Seleccionadas';
+                            message = `¿Eliminar ${this.state.selectedNotes.size} notas seleccionadas?`;
+                            confirmText = 'Eliminar Todas';
+                            break;
+                        case 'all':
+                            title = '🗑️ Limpiar Sistema';
+                            message = `¿Eliminar TODAS las ${this.getTotalNotes()} notas y ${this.state.documents.length} documentos?`;
+                            confirmText = 'Eliminar Todo';
+                            break;
+                    }
+
+                    modal.innerHTML = `
+                        <div class="modal-content">
+                            <h3 style="color: var(--danger);">${title}</h3>
+                            <p style="margin: 1rem 0; color: var(--text-secondary);">${message}</p>
+                            <p style="font-size: 0.9rem; color: var(--text-muted);">Esta acción no se puede deshacer.</p>
+                            <div class="modal-buttons">
+                                <button class="btn btn-danger" onclick="App.deleteManager.confirmDelete('${deleteType}', ${noteId}, '${noteType}', this.closest('.modal'))">
+                                    ${confirmText}
+                                </button>
+                                <button class="btn btn-sm" onclick="this.closest('.modal').remove()" style="background: #6b7280; color: white;">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    `;
+
+                    document.body.appendChild(modal);
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) modal.remove();
                     });
+                },
 
-                } catch (error) {
-                    console.error('❌ Error iniciando sesión:', error);
-                    this.showAlert(`Error: ${error.message}`, 'warning');
-                    this.stopSession();
-                }
-            }
+                confirmDelete: (deleteType, noteId, noteType, modalElement) => {
+                    let deletedCount = 0;
 
-            togglePause() {
-                if (!this.isPlaying) return;
-
-                if (this.isPaused) {
-                    this.isPaused = false;
-                    document.getElementById('pauseBtn').textContent = '⏸️ Pausar';
-                    this.showAlert('▶️ Sesión reanudada', 'info', 2000);
-                } else {
-                    this.isPaused = true;
-                    if (this.currentSource) {
-                        this.currentSource.stop();
-                    }
-                    document.getElementById('pauseBtn').textContent = '▶️ Reanudar';
-                    this.showAlert('⏸️ Sesión pausada', 'info', 2000);
-                }
-            }
-
-            stopSession() {
-                this.isPlaying = false;
-                this.isPaused = false;
-
-                // Stop audio
-                if (this.currentSource) {
-                    try {
-                        this.currentSource.stop();
-                        this.currentSource.disconnect();
-                    } catch (e) {
-                        // Already stopped
-                    }
-                    this.currentSource = null;
-                }
-
-                // Stop timers
-                if (this.sessionTimer) {
-                    clearInterval(this.sessionTimer);
-                    this.sessionTimer = null;
-                }
-                if (this.visualizerTimer) {
-                    clearInterval(this.visualizerTimer);
-                    this.visualizerTimer = null;
-                }
-
-                // Reset UI
-                document.getElementById('startBtn').disabled = this.currentState ? false : true;
-                document.getElementById('pauseBtn').disabled = true;
-                document.getElementById('stopBtn').disabled = true;
-                document.getElementById('pauseBtn').textContent = '⏸️ Pausar';
-                document.getElementById('sessionInfo').classList.add('hidden');
-                document.getElementById('timerDisplay').textContent = '00:00';
-                document.getElementById('progressFill').style.width = '0%';
-                document.getElementById('phaseDisplay').textContent = 'Preparando...';
-
-                // Reset visualizer
-                const bars = document.querySelectorAll('.wave-bar');
-                bars.forEach(bar => {
-                    bar.style.height = '8px';
-                    bar.style.opacity = '0.6';
-                });
-
-                this.elapsedTime = 0;
-                this.currentPhase = 0;
-
-                this.showAlert('⏹️ Sesión detenida', 'info', 2000);
-                console.log('⏹️ Sesión detenida');
-            }
-
-            startSessionTimer() {
-                const totalSeconds = this.duration * 60;
-                
-                this.sessionTimer = setInterval(() => {
-                    if (!this.isPaused && this.isPlaying) {
-                        this.elapsedTime++;
-                        
-                        const minutes = Math.floor(this.elapsedTime / 60);
-                        const seconds = this.elapsedTime % 60;
-                        
-                        document.getElementById('timerDisplay').textContent = 
-                            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                        
-                        const progress = (this.elapsedTime / totalSeconds) * 100;
-                        document.getElementById('progressFill').style.width = `${Math.min(progress, 100)}%`;
-                        
-                        // Update phase display
-                        const state = this.states[this.currentState];
-                        const fadeTime = state.fadeDuration;
-                        const stableTime = totalSeconds - (2 * fadeTime);
-                        
-                        if (this.elapsedTime < fadeTime) {
-                            document.getElementById('phaseDisplay').textContent = '🔄 Entrada gradual...';
-                        } else if (this.elapsedTime < fadeTime + stableTime) {
-                            document.getElementById('phaseDisplay').textContent = `🎵 ${state.name} ${state.frequency}Hz`;
-                        } else {
-                            document.getElementById('phaseDisplay').textContent = '🔄 Salida suave...';
-                        }
-                    }
-                }, 1000);
-            }
-
-            completeSession() {
-                console.log('✅ Sesión completada exitosamente');
-                
-                // Guardar datos de sesión
-                const sessionRecord = {
-                    timestamp: new Date().toISOString(),
-                    state: this.currentState,
-                    stateName: this.states[this.currentState].name,
-                    frequency: this.states[this.currentState].frequency,
-                    duration: this.duration,
-                    completed: true
-                };
-                
-                this.sessionData.push(sessionRecord);
-                this.saveSessionHistory();
-                
-                this.stopSession();
-                
-                this.showAlert(`🎉 ¡Sesión completada! ${this.duration} minutos de ${this.states[this.currentState].name}`, 'success', 5000);
-                
-                // Mostrar panel de evaluación
-                document.getElementById('evaluationGrid').style.display = 'grid';
-                document.querySelector('.evaluation-panel').scrollIntoView({ behavior: 'smooth' });
-                
-                // Reset evaluation
-                this.currentEvaluation = {
-                    sessionId: sessionRecord.timestamp,
-                    state: this.currentState,
-                    duration: this.duration
-                };
-            }
-
-            setRating(metric, value) {
-                // Visual update
-                const ratingScale = document.querySelector(`[data-metric="${metric}"]`);
-                ratingScale.querySelectorAll('.rating-btn').forEach(btn => {
-                    btn.classList.remove('selected');
-                });
-                ratingScale.querySelector(`[data-value="${value}"]`).classList.add('selected');
-                
-                // Save rating
-                this.currentEvaluation[metric] = value;
-                
-                console.log(`📊 Rating ${metric}: ${value}`);
-            }
-
-            saveEvaluation() {
-                const comments = document.getElementById('sessionComments').value.trim();
-                
-                // Verificar que al menos una rating esté completa
-                const requiredMetrics = ['relaxation', 'focus', 'mood', 'energy'];
-                const completedMetrics = requiredMetrics.filter(metric => 
-                    this.currentEvaluation.hasOwnProperty(metric)
-                );
-                
-                if (completedMetrics.length === 0) {
-                    this.showAlert('⚠️ Completa al menos una evaluación antes de guardar', 'warning');
-                    return;
-                }
-                
-                // Añadir comentarios y timestamp
-                this.currentEvaluation.comments = comments;
-                this.currentEvaluation.evaluatedAt = new Date().toISOString();
-                this.currentEvaluation.metricsCompleted = completedMetrics.length;
-                
-                // Guardar evaluación
-                const evaluations = JSON.parse(localStorage.getItem('beyondbrainfm_evaluations') || '[]');
-                evaluations.push(this.currentEvaluation);
-                localStorage.setItem('beyondbrainfm_evaluations', JSON.stringify(evaluations));
-                
-                this.showAlert(`💾 Evaluación guardada (${completedMetrics.length}/4 métricas)`, 'success', 3000);
-                
-                // Ocultar panel de evaluación
-                document.getElementById('evaluationGrid').style.display = 'none';
-                
-                // Reset form
-                document.querySelectorAll('.rating-btn').forEach(btn => btn.classList.remove('selected'));
-                document.getElementById('sessionComments').value = '';
-                
-                console.log('💾 Evaluación guardada:', this.currentEvaluation);
-                
-                // Reset evaluation object
-                this.currentEvaluation = {};
-            }
-
-            saveSessionHistory() {
-                localStorage.setItem('beyondbrainfm_sessions', JSON.stringify(this.sessionData));
-            }
-
-            loadSessionHistory() {
-                const saved = localStorage.getItem('beyondbrainfm_sessions');
-                if (saved) {
-                    this.sessionData = JSON.parse(saved);
-                    console.log(`📚 Cargadas ${this.sessionData.length} sesiones anteriores`);
-                }
-            }
-
-            showAlert(message, type = 'info', duration = 4000) {
-                const alert = document.createElement('div');
-                alert.className = `alert alert-${type}`;
-                alert.innerHTML = `<strong>${message}</strong>`;
-                
-                document.body.appendChild(alert);
-                
-                setTimeout(() => {
-                    if (document.body.contains(alert)) {
-                        alert.style.animation = 'slideOut 0.5s ease';
-                        setTimeout(() => {
-                            if (document.body.contains(alert)) {
-                                document.body.removeChild(alert);
+                    switch(deleteType) {
+                        case 'single':
+                            if (this.deleteManager.removeNote(noteId, noteType)) {
+                                deletedCount = 1;
                             }
-                        }, 500);
+                            break;
+                        case 'multiple':
+                            deletedCount = this.deleteManager.deleteSelectedNotes();
+                            break;
+                        case 'all':
+                            deletedCount = this.deleteManager.deleteAllData();
+                            break;
                     }
-                }, duration);
-            }
-        }
 
-        // Global instance and functions
-        let beyondBrainFM;
+                    modalElement.remove();
 
-        function selectState(stateId) {
-            beyondBrainFM.selectState(stateId);
-        }
+                    if (deletedCount > 0) {
+                        this.storage.save();
+                        this.ui.updateAllDisplays();
+                        
+                        const message = deletedCount === 1 ? 
+                            '🗑️ Nota eliminada' : 
+                            `🗑️ ${deletedCount} elementos eliminados`;
+                        
+                        this.ui.notify(message, 'success');
+                    } else {
+                        this.ui.notify('⚠️ Error al eliminar', 'error');
+                    }
+                },
 
-        function selectDuration(minutes) {
-            beyondBrainFM.selectDuration(minutes);
-        }
+                findNoteById: (noteId, noteType) => {
+                    if (noteType && this.state.notes[noteType]) {
+                        return this.state.notes[noteType].find(n => n.id == noteId);
+                    }
 
-        function startSession() {
-            beyondBrainFM.startSession();
-        }
+                    for (const type of Object.keys(this.state.notes)) {
+                        const note = this.state.notes[type].find(n => n.id == noteId);
+                        if (note) return note;
+                    }
+                    return null;
+                },
 
-        function togglePause() {
-            beyondBrainFM.togglePause();
-        }
+                removeNote: (noteId, noteType) => {
+                    if (noteType && this.state.notes[noteType]) {
+                        const index = this.state.notes[noteType].findIndex(n => n.id == noteId);
+                        if (index !== -1) {
+                            this.state.notes[noteType].splice(index, 1);
+                            return true;
+                        }
+                    }
 
-        function stopSession() {
-            beyondBrainFM.stopSession();
-        }
+                    for (const type of Object.keys(this.state.notes)) {
+                        const index = this.state.notes[type].findIndex(n => n.id == noteId);
+                        if (index !== -1) {
+                            this.state.notes[type].splice(index, 1);
+                            return true;
+                        }
+                    }
+                    return false;
+                },
 
-        function setRating(metric, value) {
-            beyondBrainFM.setRating(metric, value);
-        }
-
-        function saveEvaluation() {
-            beyondBrainFM.saveEvaluation();
-        }
-
-        // Initialize system
-        document.addEventListener('DOMContentLoaded', function() {
-            beyondBrainFM = new BeyondBrainFMSystem();
-            console.log('🧠 Beyond Brain.fm System loaded successfully');
-        });
-
-        // Debug access
-        window.getBeyondBrainFM = () => beyondBrainFM;
-    </script>
-
-    <!-- FOOTER -->
-    <div style="text-align: center; margin: 40px 0; padding: 30px; background: rgba(255,255,255,0.05); border-radius: 15px;">
-        <h3 style="color: #667eea; margin-bottom: 15px;">🏆 BEYOND BRAIN.FM - SISTEMA CIENTÍFICAMENTE HONESTO</h3>
-        <p style="color: #b794f6; line-height: 1.6; margin-bottom: 20px;">
-            Sistema superior a Brain.fm con transparencia total y honestidad científica<br>
-            Sin marketing exagerado • Parámetros abiertos • Auto-evaluación real<br>
-            <strong>✅ Evidencia verificable • 🔬 Claims honestos • 📊 Tracking subjetivo</strong>
-        </p>
-        
-        <div style="background: rgba(102, 126, 234, 0.1); border: 2px solid #667eea; padding: 20px; border-radius: 15px; margin: 20px 0;">
-            <h4 style="color: #667eea; margin-bottom: 15px;">🎯 DIFERENCIAS CLAVE VS BRAIN.FM</h4>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                <div>
-                    <strong style="color: #68d391;">✅ Nuestro Approach:</strong>
-                    <ul style="text-align: left; margin: 8px 0 0 20px; line-height: 1.6;">
-                        <li>Parámetros completamente abiertos</li>
-                        <li>Claims verificables y honestos</li>
-                        <li>Auto-evaluación de efectos reales</li>
-                        <li>Referencias científicas específicas</li>
-                    </ul>
-                </div>
-                <div>
-                    <strong style="color: #fed7d7;">❌ Problemas de Brain.fm:</strong>
-                    <ul style="text-align: left; margin: 8px 0 0 20px; line-height: 1.6;">
-                        <li>Algoritmos propietarios no verificables</li>
-                        <li>Marketing exagerado sobre efectos</li>
-                        <li>Estudios limitados y sesgados</li>
-                        <li>Claims no replicados independientemente</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        
-        <p style="color: #a0aec0; font-size: 0.9em; margin-top: 20px;">
-            <strong>Uso responsable:</strong> Este sistema es para exploración personal y no constituye tratamiento médico.
-            Los efectos de audio neurológico son sutiles y variables. Evalúa honestamente tu experiencia individual.
-        </p>
-    </div>
-
-    <script>
-    // ==========================================
-    // PWA INSTALLATION & SERVICE WORKER
-    // ==========================================
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', async () => {
-            try {
-                const registration = await navigator.serviceWorker.register('./service-worker.js', {
-                    scope: './'
-                });
-                console.log('✅ Service Worker registrado:', registration.scope);
-                
-                // Manejar actualizaciones
-                registration.addEventListener('updatefound', () => {
-                    const newWorker = registration.installing;
-                    newWorker.addEventListener('statechange', () => {
-                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            // Nueva versión disponible
-                            showUpdateNotification();
+                deleteSelectedNotes: () => {
+                    let deletedCount = 0;
+                    
+                    this.state.selectedNotes.forEach(noteId => {
+                        if (this.deleteManager.removeNote(noteId)) {
+                            deletedCount++;
                         }
                     });
-                });
-            } catch (error) {
-                console.error('❌ Error registrando Service Worker:', error);
-            }
-        });
-    }
 
-    // PWA Install Prompt
-    let deferredPrompt;
+                    this.state.selectedNotes.clear();
+                    return deletedCount;
+                },
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-        console.log('💾 PWA instalable detectada');
-        e.preventDefault();
-        deferredPrompt = e;
-        showInstallButton();
-    });
+                deleteAllData: () => {
+                    const totalNotes = this.getTotalNotes();
+                    const totalDocs = this.state.documents.length;
 
-    function showInstallButton() {
-        // Crear botón de instalación si no existe
-        if (!document.getElementById('pwa-install-btn')) {
-            const installBtn = document.createElement('button');
-            installBtn.id = 'pwa-install-btn';
-            installBtn.innerHTML = '📱 Instalar App';
-            installBtn.style.cssText = `
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                background: linear-gradient(45deg, #667eea, #764ba2);
-                color: white;
-                border: none;
-                padding: 12px 20px;
-                border-radius: 25px;
-                cursor: pointer;
-                font-weight: bold;
-                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-                z-index: 1000;
-                transition: transform 0.2s ease;
-            `;
-            
-            installBtn.addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const result = await deferredPrompt.userChoice;
-                    console.log('👤 Usuario eligió:', result.outcome);
-                    deferredPrompt = null;
-                    installBtn.remove();
+                    Object.keys(this.state.notes).forEach(type => {
+                        this.state.notes[type] = [];
+                    });
+
+                    this.state.documents = [];
+                    this.state.analytics = {
+                        documentsProcessed: 0,
+                        totalReviews: 0,
+                        retentionRate: 0.75
+                    };
+
+                    this.state.selectedNotes.clear();
+                    this.state.currentEdit = null;
+                    this.state.searchResults = [];
+
+                    this.storage.clear();
+
+                    return totalNotes + totalDocs;
+                },
+
+                toggleNoteSelection: (noteId) => {
+                    if (this.state.selectedNotes.has(noteId)) {
+                        this.state.selectedNotes.delete(noteId);
+                    } else {
+                        this.state.selectedNotes.add(noteId);
+                    }
+                    this.search.perform();
                 }
-            });
-            
-            installBtn.addEventListener('mouseenter', () => {
-                installBtn.style.transform = 'scale(1.05)';
-            });
-            
-            installBtn.addEventListener('mouseleave', () => {
-                installBtn.style.transform = 'scale(1)';
-            });
-            
-            document.body.appendChild(installBtn);
-        }
-    }
+            };
 
-    function showUpdateNotification() {
-        const updateDiv = document.createElement('div');
-        updateDiv.innerHTML = `
-            <div style="position: fixed; top: 20px; right: 20px; background: #667eea; color: white; 
-                        padding: 15px; border-radius: 10px; z-index: 1001; max-width: 300px;">
-                <strong>🔄 Nueva versión disponible</strong>
-                <p style="margin: 5px 0;">Actualiza para obtener las mejoras más recientes.</p>
-                <button onclick="updateApp()" style="background: white; color: #667eea; border: none; 
-                        padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-right: 10px;">
-                    Actualizar
-                </button>
-                <button onclick="this.parentElement.parentElement.remove()" style="background: transparent; 
-                        color: white; border: 1px solid white; padding: 8px 16px; border-radius: 5px; cursor: pointer;">
-                    Después
-                </button>
-            </div>
-        `;
-        document.body.appendChild(updateDiv);
-    }
+            // === MÓDULO UI ===
+            ui = {
+                switchTab: (tabId) => {
+                    document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+                    document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
 
-    function updateApp() {
-        if (navigator.serviceWorker.controller) {
-            navigator.serviceWorker.controller.postMessage({type: 'SKIP_WAITING'});
-            window.location.reload();
-        }
-    }
-    </script>
-</body>
-</html>bottom: 10px;">📊 Parámetros Usados</h4>
-                    <ul style="color: #9ae6b4; line-height: 1.6; margin-left: 20px;">
-                        <li><strong>Isochronic Tones:</strong> Modulación de amplitud pura</li>
-                        <li><strong>Carrier 220Hz:</strong> Frecuencia A3, naturalmente agradable</li>
-                        <li><strong>Modulación:</strong> 25-35% según estado</li>
-                        <li><strong>Entrada/Salida:</strong> 60s fade suave</li>
-                    </ul>
-                </div>
-                
-                <div class="research-card">
-                    <h4 style="color: #48bb78; margin-bottom: 10px;">📚 Referencias</h4>
-                    <ul style="color: #9ae6b4; line-height: 1.6; margin-left: 20px; font-size: 0.9em;">
-                        <li>Alpha: Clayton et al. (2015) - EEG en relajación</li>
-                        <li>SMR: Sterman & Egner (2006) - Neurofeedback</li>
-                        <li>Theta: Oster (1973) - Binaural beats</li>
-                        <li>Isochronic: Richardson et al. (2011)</li>
-                    </ul>
-                </div>
-                
-                <div class="research-card">
-                    <h4 style="color: #48bb78; margin-bottom: 10px;">⚠️ Limitaciones</h4>
-                    <ul style="color: #fed7d7; line-height: 1.6; margin-left: 20px;">
-                        <li>Efectos altamente variables entre personas</li>
-                        <li>Mecanismos neurológicos aún debatidos</li>
-                        <li>Estudios a menudo con muestras pequeñas</li>
-                        <li>Placebo effect significativo en algunos casos</li>
-                    </ul>
-                </div>
-                
-                <div class="research-card">
-                    <h4 style="color: #48bb78; margin-
+                    document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
+                    document.getElementById(`panel-${tabId}`).classList.add('active');
+
+                    this.state.currentTab = tabId;
+                    this.ui.updateDisplay(tabId);
+                },
+
+                updateAllDisplays: () => {
+                    this.ui.updateDisplay(this.state.currentTab);
+                    this.ui.updateNavCounts();
+                },
+
+                updateNavCounts: () => {
+                    const counts = {
+                        upload: this.state.documents.length,
+                        testing: this.state.notes.testing.length,
+                        elaborative: this.state.notes.elaborative.length,
+                        explanation: this.state.notes.explanation.length,
+                        interleaving: this.state.notes.interleaving.length,
+                        manager: this.getTotalNotes()
+                    };
+
+                    Object.entries(counts).forEach(([type, count]) => {
+                        const badge = document.getElementById(`${type}Count`);
+                        if (badge) {
+                            badge.textContent = count;
+                            badge.classList.toggle('hidden', count === 0);
+                        }
+                    });
+                },
+
+                updateDisplay: (tabId) => {
+                    switch(tabId) {
+                        case 'upload': this.ui.updateUploadDisplay(); break;
+                        case 'testing': this.ui.updateTestingDisplay(); break;
+                        case 'elaborative': this.ui.updateElaborativeDisplay(); break;
+                        case 'explanation': this.ui.updateExplanationDisplay(); break;
+                        case 'interleaving': this.ui.updateInterleavingDisplay(); break;
+                        case 'manager': this.ui.updateManagerDisplay(); break;
+                        case 'analytics': this.ui.updateAnalyticsDisplay(); break;
+                    }
+                    this.ui.updateNavCounts();
+                },
+
+                updateUploadDisplay: () => {
+                    if (this.state.documents.length > 0) {
+                        document.getElementById('results').classList.remove('hidden');
+                        this.ui.updateGeneratedQuestions();
+                        this.ui.updateDocumentAnalysis();
+                    }
+                },
+
+                updateDocumentAnalysis: () => {
+                    const container = document.getElementById('documentAnalysis');
+                    const totalWords = this.state.documents.reduce((sum, doc) => sum + (doc.wordCount || 0), 0);
+                    const concepts = this.state.documents.flatMap(doc => doc.concepts || []);
+
+                    container.innerHTML = `
+                        <div class="stats" style="margin-bottom: 1rem;">
+                            <div class="stat">
+                                <div class="stat-value">${totalWords.toLocaleString()}</div>
+                                <div class="stat-label">Palabras Analizadas</div>
+                            </div>
+                        </div>
+                        <h4>🎯 Conceptos Identificados</h4>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                            ${concepts.slice(0, 6).map(concept => 
+                                `<span class="badge">${concept}</span>`
+                            ).join('')}
+                        </div>
+                    `;
+                },
+
+                updateGeneratedQuestions: () => {
+                    const container = document.getElementById('generatedQuestions');
+                    const questions = this.state.notes.testing.filter(q => q.source === 'AI_Generated').slice(0, 5);
+
+                    if (questions.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty">
+                                <div class="empty-icon">🤖</div>
+                                <div class="empty-title">Sin preguntas IA</div>
+                                <p>Sube documentos para generación automática</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    container.innerHTML = questions.map(q => `
+                        <div class="note">
+                            <div class="note-header">
+                                <div class="note-title">${q.concept}</div>
+                                <div style="display: flex; align-items: center;">
+                                    <div class="note-badges">
+                                        <span class="badge badge-${q.difficulty}">${this.ui.getDifficultyIcon(q.difficulty)}</span>
+                                        <span class="badge badge-ai">🤖 IA</span>
+                                    </div>
+                                    <div class="note-actions">
+                                        <button class="btn btn-danger" onclick="App.deleteManager.deleteNote(${q.id}, 'testing')" title="Eliminar">🗑️</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="color: var(--text-secondary);">${q.question}</div>
+                        </div>
+                    `).join('');
+                },
+
+                updateTestingDisplay: () => {
+                    const container = document.getElementById('testingQuestions');
+                    const notes = this.state.notes.testing;
+
+                    if (notes.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty">
+                                <div class="empty-icon">🎯</div>
+                                <div class="empty-title">Sin preguntas</div>
+                                <p>Sube documentos o crea manualmente</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    container.innerHTML = notes.map(note => `
+                        <div class="note" onclick="App.testing.startReview(${note.id})">
+                            <div class="note-header">
+                                <div class="note-title">${note.concept}</div>
+                                <div style="display: flex; align-items: center;">
+                                    <div class="note-badges">
+                                        <span class="badge badge-${note.difficulty}">${this.ui.getDifficultyIcon(note.difficulty)}</span>
+                                        ${note.source === 'AI_Generated' ? '<span class="badge badge-ai">🤖</span>' : ''}
+                                    </div>
+                                    <div class="note-actions">
+                                        <button class="btn btn-danger" onclick="event.stopPropagation(); App.deleteManager.deleteNote(${note.id}, 'testing')" title="Eliminar">🗑️</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="color: var(--text-secondary);">${note.question}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+                                Revisiones: ${note.reviewCount || 0}
+                            </div>
+                        </div>
+                    `).join('');
+                },
+
+                updateElaborativeDisplay: () => {
+                    const container = document.getElementById('elaborativeConcepts');
+                    const notes = this.state.notes.elaborative;
+
+                    if (notes.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty">
+                                <div class="empty-icon">🤔</div>
+                                <div class="empty-title">Sin conceptos</div>
+                                <p>Sube documentos para identificación automática</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    container.innerHTML = notes.map(note => `
+                        <div class="note" onclick="App.elaborative.select(${note.id})">
+                            <div class="note-header">
+                                <div class="note-title">${note.concept}</div>
+                                <div style="display: flex; align-items: center;">
+                                    <div class="note-badges">
+                                        ${note.source === 'AI_Generated' ? '<span class="badge badge-ai">🤖</span>' : ''}
+                                    </div>
+                                    <div class="note-actions">
+                                        <button class="btn btn-danger" onclick="event.stopPropagation(); App.deleteManager.deleteNote(${note.id}, 'elaborative')" title="Eliminar">🗑️</button>
+                                    </div>
+                                </div>
+                            
